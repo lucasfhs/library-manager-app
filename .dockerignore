@@ -1,4 +1,8 @@
-node_modules
-.gitignore
-.dockerignore
-Dockerfile
+.git
+.github
+**/node_modules
+**/.npm-cache
+**/dist
+**/coverage
+.env
+*.log
