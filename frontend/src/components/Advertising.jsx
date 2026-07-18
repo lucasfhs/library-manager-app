@@ -6,7 +6,7 @@ function Advertising() {
     <div className="bg-gray-800 text-white h-full flex flex-col justify-center items-center p-6 sm:p-12">
       {/* Título */}
       <h2 className="text-3xl sm:text-5xl font-bold text-center leading-tight max-w-3xl mb-6">
-        Library Manager App: <br />
+        Library Manager: <br />
         <span className="text-spring-green">Abra um livro, abra sua mente</span>
       </h2>
 

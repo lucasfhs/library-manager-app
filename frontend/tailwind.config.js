@@ -10,7 +10,7 @@ export default {
         "rich-black": "#0d1321",
       },
       fontFamily: {
-        playwrite: ['"Playwrite VN"', "sans-serif"], // Fonte Playwrite VN
+        playfair: ['"Playfair Display"', "Georgia", "serif"],
         publicSans: ['"Public Sans"', "sans-serif"], // Fonte Public Sans
         chakraPetch: ['"Chakra Petch"', "sans-serif"], // Fonte Chakra Petch
         deliusSwashCaps: ['"Delius Swash Caps"', "cursive"], // Fonte Delius Swash Caps

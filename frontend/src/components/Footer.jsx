@@ -9,7 +9,7 @@ function Footer() {
           {/* Logo e Descrição */}
           <div className="flex flex-col items-center md:items-start">
             <h1 className="text-3xl font-bold text-spring-green mb-2">
-              Library Manager App
+              Library Manager
             </h1>
             <p className="text-india-green text-sm">
               Sua central de leitura e aprendizado desde 2025.
@@ -71,7 +71,7 @@ function Footer() {
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center mt-6 text-sm">
           <p className="text-center md:text-left">
-            &copy; 2026 Library Manager App. Todos os direitos reservados.
+            &copy; 2026 Library Manager. Todos os direitos reservados.
           </p>
           <div className="flex gap-4 mt-4 md:mt-0">
             <a

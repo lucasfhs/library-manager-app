@@ -1,17 +1,11 @@
-import { BookCheck, User, LogOut } from "lucide-react";
+import { User, LogOut } from "lucide-react";
+import BrandLogo from "./BrandLogo";
 
 function NavBarUser() {
   return (
     <nav className="bg-spring-green border-2 border-rich-black px-6 py-4 flex justify-between items-center">
       {/* Logo e Título */}
-      <div className="flex items-center gap-4">
-        <div className="p-2 bg-white rounded-full">
-          <BookCheck size={32} />
-        </div>
-        <h1 className="text-rich-black font-bold text-xl md:text-2xl">
-          Library Manager App
-        </h1>
-      </div>
+      <BrandLogo className="text-2xl lg:text-3xl" />
 
       {/* Navegação Central */}
       <div className="flex gap-8 font-semibold text-rich-black text-lg">

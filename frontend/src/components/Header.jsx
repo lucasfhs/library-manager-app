@@ -1,14 +1,11 @@
-import { BookCheck } from "lucide-react";
+import BrandLogo from "./BrandLogo";
+
 function Header() {
   return (
-    <div>
-      <div className="flex justify-center font-chakraPetch items-center gap-2 py-4 bg-spring-green font-bold text-3xl md:text-5xl border sm:border-2 border-black">
-        <div className="p-4 bg-white border-2 border-gray-950 rounded-full">
-          <BookCheck size={48} />
-        </div>
-        Library Manager App
-      </div>
-    </div>
+    <header className="flex justify-center items-center px-4 py-3 bg-spring-green border-b-2 border-rich-black shadow-sm">
+      <BrandLogo className="text-4xl sm:text-5xl md:text-6xl" />
+    </header>
   );
 }
+
 export default Header;
