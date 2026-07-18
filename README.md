@@ -1,6 +1,6 @@
 # Library Manager App
 
-![Library Manager App cover](./preview/domestic-life-illustrated.jpg)
+<img src="./preview/domestic-life-illustrated.jpg" alt="Library Manager App cover" width="420">
 
 Library Manager App is a full-stack academic library management system originally developed for the Database I course at CEFET-MG. This repository brings the legacy React frontend and Node.js REST API together in one project while keeping each application isolated and independently buildable.
 
