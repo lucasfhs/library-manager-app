@@ -1,5 +1,15 @@
 # Library Manager App
 
+### Demonstração visual
+
+Conheça a interface sem instalar nada: **um tour de 26 segundos**, com capturas reais da aplicação executada localmente, legendas em português e destaque das interações.
+
+<p align="center">
+  <img src="./preview/library-manager-demo.gif" alt="Tour animado do Library Manager: página inicial, login de operador, edição de livros, estoque, área do leitor e histórico de empréstimos" width="960">
+  <br>
+  <sub>Visão geral · 26 segundos · Reprodução em loop</sub>
+</p>
+
 **Gestão de bibliotecas · React + Express + PostgreSQL**
 
 [Português (Brasil)](#pt-br) · [English](#english)
@@ -10,21 +20,15 @@
 
 ## Português (Brasil)
 
+
+
 ### Sobre o projeto
 
 O Library Manager App é um sistema acadêmico full-stack de gestão de bibliotecas, desenvolvido originalmente para a disciplina de Banco de Dados I do CEFET-MG. Este repositório reúne o frontend React e a API REST Node.js do projeto original, mantendo as aplicações independentes para desenvolvimento e build.
 
 O domínio da aplicação abrange leitores, operadores, livros, bibliotecas, estoque, empréstimos, autenticação e relatórios administrativos. O PostgreSQL armazena os dados e implementa parte das regras de negócio por meio de relacionamentos, funções e gatilhos presentes no SQL original.
 
-### Demonstração visual
 
-Conheça a interface sem instalar nada: **um tour de 26 segundos**, com capturas reais da aplicação executada localmente, legendas em português e destaque das interações.
-
-<p align="center">
-  <img src="./preview/library-manager-demo.gif" alt="Tour animado do Library Manager: página inicial, login de operador, edição de livros, estoque, área do leitor e histórico de empréstimos" width="960">
-  <br>
-  <sub>Visão geral · 26 segundos · Reprodução em loop</sub>
-</p>
 
 #### Gestão do acervo e disponibilidade
 
