@@ -1,0 +1,13 @@
+{
+  "name": "library-manager-preview-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "capture": "node capture.mjs"
+  },
+  "dependencies": {
+    "embedded-postgres": "16.6.0-beta.15",
+    "pg-copy-streams": "7.0.0",
+    "playwright": "1.58.2"
+  }
+}
