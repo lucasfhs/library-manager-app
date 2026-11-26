@@ -1,10 +1,30 @@
 # Library Manager App
 
-<img src="./preview/domestic-life-illustrated.jpg" alt="Library Manager App cover" width="420">
+<img src="./preview/library-manager-demo.gif" alt="Animated tour of Library Manager: home page, operator login, book editing, library stock, reader view, and loan history" width="960">
 
 Library Manager App is a full-stack academic library management system originally developed for the Database I course at CEFET-MG. This repository brings the legacy React frontend and Node.js REST API together in one project while keeping each application isolated and independently buildable.
 
 The application manages readers, operators, books, libraries, inventory, loans, authentication, and administrative reports. PostgreSQL stores the domain data and enforces part of the business logic through relationships, functions, and triggers included in the original database dump.
+
+## Visual demonstration
+
+The preview above is a **26-second tour of the actual application running locally**, with Portuguese captions, highlighted interactions, and a continuous loop. No deployment or installation is needed to watch it.
+
+### Book management and library stock
+
+Edit book fields and adjust the number of available copies using the existing administrative interface.
+
+<img src="./preview/library-manager-admin.gif" alt="Animated demonstration of editing book fields and changing available copies from 10 to 12 in local interface state" width="960" loading="lazy">
+
+### Reader view and loan history
+
+Open the library availability pop-up and view the sample loan history, including book titles, libraries, and dates.
+
+<img src="./preview/library-manager-catalogo.gif" alt="Animated demonstration of the reader book card, library pop-up, and sample loan history" width="960" loading="lazy">
+
+> **Current implementation:** operator login in the recording uses the real Express API and PostgreSQL. The reader card, library list, and loan history contain sample data; book and stock edits shown here use local React state and are not persisted to the database. Some sections are opened directly because their navigation buttons are not wired up yet. The GIFs do not demonstrate completed book registration, borrowing, or reporting workflows.
+
+See [`preview/README.md`](./preview/README.md) for the recording process, limitations, and instructions to regenerate the previews. The [original illustration](./preview/domestic-life-illustrated.jpg) is preserved.
 
 ## Technology stack
 
@@ -152,7 +172,7 @@ The original presentation video is available on [YouTube](https://www.youtube.co
 - Author: Lucas Henrique
 - Contributor: Maria Vitória Peixoto
 
-Cover image: [Freepik AI Illustration](https://www.freepik.com/free-ai-image/domestic-life-illustrated_381099438.htm)
+Original illustration: [Freepik AI Illustration](https://www.freepik.com/free-ai-image/domestic-life-illustrated_381099438.htm)
 
 ## License
 
