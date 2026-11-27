@@ -69,6 +69,16 @@ Busca no catálogo, disponibilidade por biblioteca, pedido de empréstimo e hist
   <sub>Leitores · Catálogo, empréstimo e histórico</sub>
 </p>
 
+#### Multas e pagamento com Stripe
+
+Multas por atraso calculadas no PostgreSQL e pagas no Stripe Checkout em modo de teste, com a confirmação gravada no banco.
+
+<p align="center">
+  <img src="./preview/library-manager-pagamento.gif" alt="Demonstração animada: a leitora Ana Júlia vê sete multas por atraso que somam R$ 243,60, paga no Stripe Checkout com o cartão de teste 4242 e volta ao sistema com todas as multas quitadas" width="960" loading="lazy">
+  <br>
+  <sub>Leitores · Multas, Stripe Checkout e confirmação</sub>
+</p>
+
 O processo de gravação e as instruções para recriar os GIFs estão em [`preview/README.md`](./preview/README.md). A [ilustração original](./preview/domestic-life-illustrated.jpg) foi preservada.
 
 ### Tecnologias
@@ -162,7 +172,7 @@ O banco inicial contém registros de demonstração. **Não reutilize estas cred
 | --- | --- | --- |
 | Operador | usuário `admin` | `admin` |
 | Leitor | CPF `321.687.810-44` (João Pedro) | `1234` |
-| Leitora com multas | CPF `236.114.820-05` (Ana Júlia, R$ 190,70 em aberto) | `pokemon` |
+| Leitora com multas | CPF `236.114.820-05` (Ana Júlia, R$ 243,60 em aberto) | `pokemon` |
 
 #### Pagamentos com Stripe (opcional)
 
@@ -330,6 +340,16 @@ Catalog search, availability per library, a loan request, and the updated histor
   <sub>Readers · Catalog, borrowing, and history</sub>
 </p>
 
+#### Late fees and Stripe payment
+
+Late fees computed in PostgreSQL and paid on Stripe Checkout in test mode, with the confirmation saved to the database.
+
+<p align="center">
+  <img src="./preview/library-manager-pagamento.gif" alt="Animated demonstration: the reader Ana Júlia sees seven late fees totaling R$ 243.60, pays on Stripe Checkout with the 4242 test card, and returns to the app with every fine settled" width="960" loading="lazy">
+  <br>
+  <sub>Readers · Late fees, Stripe Checkout, and confirmation</sub>
+</p>
+
 See [`preview/README.md`](./preview/README.md) for the recording process and instructions to regenerate the previews. The [original illustration](./preview/domestic-life-illustrated.jpg) is preserved.
 
 ### Technology stack
@@ -424,7 +444,7 @@ The seeded database includes demonstration records. Never reuse these credential
 | --- | --- | --- |
 | Operator | user `admin` | `admin` |
 | Reader | CPF `321.687.810-44` (João Pedro) | `1234` |
-| Reader with fines | CPF `236.114.820-05` (Ana Júlia, R$ 190.70 due) | `pokemon` |
+| Reader with fines | CPF `236.114.820-05` (Ana Júlia, R$ 243.60 due) | `pokemon` |
 
 #### Stripe payments (optional)
 

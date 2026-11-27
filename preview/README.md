@@ -4,13 +4,15 @@ GIFs feitos com **capturas reais do projeto executado localmente**, a partir do 
 de produção do frontend, da API Express e de um PostgreSQL 18 temporário. Não há
 respostas de API simuladas nem dados de exemplo embutidos na interface: tudo o que
 aparece foi lido do banco ou gravado nele durante a captura. Moldura, legendas,
-cursor destacado e transições são elementos editoriais.
+cursor destacado e transições são elementos editoriais. O pagamento usa o Stripe
+Checkout real em modo de teste, sem cobrança de verdade.
 
 | Arquivo | Conteúdo | Duração aproximada | Tamanho |
 | --- | --- | --- | --- |
 | [library-manager-demo.gif](./library-manager-demo.gif) | Visão geral das oito etapas | 34 s | 3,4 MiB |
 | [library-manager-admin.gif](./library-manager-admin.gif) | Painel, livros, estoque e devoluções | 24 s | 1,4 MiB |
 | [library-manager-catalogo.gif](./library-manager-catalogo.gif) | Catálogo do leitor, pedido de empréstimo e histórico | 13 s | 0,5 MiB |
+| [library-manager-pagamento.gif](./library-manager-pagamento.gif) | Multas por atraso pagas no Stripe Checkout (modo de teste) | 13 s | 0,7 MiB |
 
 Todos têm resolução de **1280 × 1000**, legendas em português e reprodução em loop.
 A ilustração original `domestic-life-illustrated.jpg` foi preservada.
@@ -27,15 +29,21 @@ A ilustração original `domestic-life-illustrated.jpg` foi preservada.
 7. O leitor busca um livro, consulta a disponibilidade por biblioteca e solicita o
    empréstimo; o estoque cai de 7 para 6.
 8. O novo empréstimo aparece no histórico do leitor com o prazo de devolução.
+9. A leitora Ana Júlia vê sete multas por atraso, calculadas pelo PostgreSQL, que
+   somam R$ 243,60; paga no Stripe Checkout com o cartão de teste 4242 e, de volta
+   ao sistema, a API confirma a sessão na Stripe e todas as multas aparecem pagas.
 
 Cada etapa é conferida pelo script (`validation.json`), e a captura falha se o
 navegador registrar qualquer erro de JavaScript.
 
 ### Observações
 
-- As contas usadas são as de demonstração do `init.sql` (operador `admin` e o
-  leitor João Pedro). As senhas não aparecem nas imagens.
+- As contas usadas são as de demonstração do `init.sql` (operador `admin` e os
+  leitores João Pedro e Ana Júlia). As senhas não aparecem nas imagens.
 - Respostas 4xx esperadas da API, como regras de negócio, não contam como erro.
+- A página do Stripe Checkout pertence à Stripe e fica fora da verificação de erros
+  do navegador; a barra de endereço da moldura mostra apenas o domínio, sem o
+  identificador da sessão.
 - Os dados de demonstração vêm do SQL original; nenhuma informação pessoal real
   foi digitada durante a gravação.
 
@@ -97,6 +105,11 @@ O script:
 Os bancos e volumes existentes não são acessados. Para usar outro diretório
 temporário, defina `PREVIEW_TMP`.
 
+As cenas de pagamento só são gravadas quando há uma chave **de teste** da Stripe
+(`sk_test_…`) em `STRIPE_SECRET_KEY`, no ambiente ou em `backend/.env`. Sem ela, o
+script pula essas cenas; com uma chave `sk_live_…`, ele se recusa a executar. Cada
+captura faz um pagamento de teste, visível no painel da Stripe em modo de teste.
+
 ### 3. Compor e otimizar
 
 Na raiz do repositório:
@@ -105,7 +118,8 @@ Na raiz do repositório:
 python3 preview/tools/render.py
 ```
 
-O renderizador recria os três GIFs desta pasta com uma paleta compartilhada,
+O renderizador recria os GIFs desta pasta (o de pagamento, quando houver cenas de
+pagamento) com uma paleta compartilhada,
 transições entre seções e movimentos de cursor. O FFmpeg otimiza os retângulos
 alterados sem acrescentar telas fictícias.
 
@@ -113,7 +127,9 @@ alterados sem acrescentar telas fictícias.
 
 Os intermediários ficam em `preview/tools/.capture/`, ignorado pelo Git:
 
-- `review.jpg`: painel com as oito seções para inspeção visual.
+- `review.jpg`: painel com cada seção gravada para inspeção visual.
+- `stripe-debug.png`: só aparece se a página da Stripe mudar e o script não
+  encontrar o formulário de cartão.
 - `scenes.json`: ordem, duração, rota, legendas e posições do cursor.
 - `validation.json`: verificações de cada etapa e erros do navegador.
 - `render-validation.json`: tamanho, resolução e duração dos GIFs.
@@ -121,4 +137,4 @@ Os intermediários ficam em `preview/tools/.capture/`, ignorado pelo Git:
 
 O renderizador verifica que os GIFs têm mais de um quadro, loop infinito,
 resolução esperada e tamanho inferior a 10 MiB por arquivo. Confira também
-a reprodução dos três GIFs e sua legibilidade no README.
+a reprodução dos GIFs e sua legibilidade no README.
