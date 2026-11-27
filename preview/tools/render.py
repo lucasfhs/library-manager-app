@@ -14,8 +14,9 @@ SIZE = (1280, 1000)
 GREEN = "#0cf574"
 WHITE = "#f1f7f4"
 MUTED = "#9baea6"
-SECTIONS = ["home", "login", "admin", "library", "catalog", "loans"]
-NAMES = ["Início", "Acesso", "Acervo", "Bibliotecas", "Leitores", "Histórico"]
+SECTIONS = ["home", "login", "dashboard", "books", "stock", "loans", "catalog", "history"]
+NAMES = ["Início", "Acesso", "Painel", "Acervo", "Estoque", "Circulação", "Catálogo", "Histórico"]
+NAV_STEP = 1200 // len(SECTIONS)
 
 
 def font(size, bold=False):
@@ -80,10 +81,8 @@ def compose(scene, series, progress, pointer=None, pulse=False):
                            fill="#1c2c27", outline="#365045", width=1)
     for x, color in [(59, "#fb7771"), (79, "#f2c765"), (99, "#62d79b")]:
         draw.ellipse((x, 181, x+9, 190), fill=color)
-    routes = {"home": "/", "closing": "/", "login": "/loginAdmin", "admin": "/admin",
-              "library": "/library", "catalog": "/user", "loans": "/loan"}
     draw.rounded_rectangle((350, 175, 930, 197), radius=5, fill="#10231b")
-    address = f"localhost   /   library-manager   {routes[scene['section']]}"
+    address = f"localhost   /   library-manager   {scene['route']}"
     draw.text((370, 175), address, font=FONTS["chrome"], fill=MUTED)
     draw.text((1104, 175), "EXECUÇÃO LOCAL", font=FONTS["chrome"], fill=MUTED)
     with Image.open(CAPTURE / scene["image"]) as screenshot:
@@ -108,11 +107,12 @@ def compose(scene, series, progress, pointer=None, pulse=False):
     draw.text((1238-series_width, 937), series, font=FONTS["tiny"], fill=MUTED)
     selected = "home" if scene["section"] == "closing" else scene["section"]
     for i, (section, name) in enumerate(zip(SECTIONS, NAMES)):
-        x = 40 + i*202
+        x = 40 + i*NAV_STEP
+        width = NAV_STEP - 14
         active = section == selected
-        draw.rounded_rectangle((x, 976, x+188, 979), radius=1, fill="#234234")
+        draw.rounded_rectangle((x, 976, x+width, 979), radius=1, fill="#234234")
         if active:
-            draw.rounded_rectangle((x, 976, x+max(2, int(188*progress)), 979),
+            draw.rounded_rectangle((x, 976, x+max(2, int(width*progress)), 979),
                                    radius=1, fill=GREEN)
         draw.text((x, 956), name, font=FONTS["nav"], fill=GREEN if active else "#657e70")
     return image
@@ -207,22 +207,22 @@ def render(name, scenes, series):
 def main():
     scenes = json.loads((CAPTURE / "scenes.json").read_text())
     result = []
-    result.append(render("library-manager-demo.gif", scenes, "VISÃO GERAL"))
-    catalog = [dict(scene) for scene in scenes if scene["section"] in {"catalog", "loans"}]
+    # The overview runs a little faster; the focused GIFs keep a slower pace.
+    overview = [dict(scene, seconds=scene["seconds"] * 0.85) for scene in scenes]
+    result.append(render("library-manager-demo.gif", overview, "VISÃO GERAL"))
+    catalog = [dict(scene) for scene in scenes if scene["section"] in {"catalog", "history"}]
     for scene in catalog:
-        scene["seconds"] *= 1.5
-    result.append(render("library-manager-catalogo.gif", catalog, "LEITORES & HISTÓRICO"))
-    admin = [dict(scene) for scene in scenes if scene["section"] in {"admin", "library"}]
-    for scene in admin:
         scene["seconds"] *= 1.3
-    result.append(render("library-manager-admin.gif", admin, "ACERVO & DISPONIBILIDADE"))
+    result.append(render("library-manager-catalogo.gif", catalog, "LEITORES & EMPRÉSTIMOS"))
+    admin = [dict(scene) for scene in scenes
+             if scene["section"] in {"dashboard", "books", "stock", "loans"}]
+    for scene in admin:
+        scene["seconds"] *= 1.15
+    result.append(render("library-manager-admin.gif", admin, "OPERAÇÃO DO ACERVO"))
     # Contact sheet for visual review. Intermediate files are intentionally not committed.
-    review = Image.new("RGB", (1280, 1500), "#07130e")
-    sections = ["home", "login", "admin", "library", "catalog", "loans"]
-    for i, section in enumerate(sections):
-        scene = next(scene for scene in scenes if scene["section"] == section)
-        if section in {"library", "catalog"}:
-            scene = [s for s in scenes if s["section"] == section][-2]
+    review = Image.new("RGB", (1280, 2000), "#07130e")
+    for i, section in enumerate(SECTIONS):
+        scene = [s for s in scenes if s["section"] == section][-1]
         frame = compose(scene, "REVISÃO", 1, scene["pointer"])
         review.paste(frame.resize((640, 500)), ((i % 2)*640, (i//2)*500))
     review.save(CAPTURE / "review.jpg", quality=95)

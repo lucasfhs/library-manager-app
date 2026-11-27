@@ -1,14 +1,16 @@
 # Previews do Library Manager
 
-GIFs feitos com **capturas reais do projeto executado localmente**, sem hospedagem,
-sem respostas de API simuladas e sem alterações no código ou no estilo da aplicação.
-Moldura, legendas, cursor destacado e transições são elementos editoriais.
+GIFs feitos com **capturas reais do projeto executado localmente**, a partir do build
+de produção do frontend, da API Express e de um PostgreSQL 18 temporário. Não há
+respostas de API simuladas nem dados de exemplo embutidos na interface: tudo o que
+aparece foi lido do banco ou gravado nele durante a captura. Moldura, legendas,
+cursor destacado e transições são elementos editoriais.
 
 | Arquivo | Conteúdo | Duração aproximada | Tamanho |
 | --- | --- | --- | --- |
-| [library-manager-demo.gif](./library-manager-demo.gif) | Visão geral das seis etapas | 26 s | 1,33 MiB |
-| [library-manager-admin.gif](./library-manager-admin.gif) | Edição de livros e quantidade de exemplares | 13 s | 0,32 MiB |
-| [library-manager-catalogo.gif](./library-manager-catalogo.gif) | Ficha do leitor, bibliotecas e histórico | 12 s | 0,24 MiB |
+| [library-manager-demo.gif](./library-manager-demo.gif) | Visão geral das oito etapas | 34 s | 3,4 MiB |
+| [library-manager-admin.gif](./library-manager-admin.gif) | Painel, livros, estoque e devoluções | 24 s | 1,4 MiB |
+| [library-manager-catalogo.gif](./library-manager-catalogo.gif) | Catálogo do leitor, pedido de empréstimo e histórico | 13 s | 0,5 MiB |
 
 Todos têm resolução de **1280 × 1000**, legendas em português e reprodução em loop.
 A ilustração original `domestic-life-illustrated.jpg` foi preservada.
@@ -16,33 +18,32 @@ A ilustração original `domestic-life-illustrated.jpg` foi preservada.
 ## O que a demonstração comprova
 
 1. A página inicial e a tela de acesso renderizam no navegador.
-2. O login de operador é validado pela API Express conectada a um PostgreSQL 16 real.
-3. Os campos do livro podem ser editados na interface administrativa.
-4. Os controles da tela de biblioteca alteram a quantidade de 10 para 12.
-5. O pop-up de bibliotecas abre e fecha.
-6. O histórico exibe seus dados de exemplo.
+2. O login de operador é validado pela API Express conectada ao PostgreSQL 18.
+3. O painel mostra indicadores, empréstimos recentes e o acervo por categoria
+   calculados a partir do banco.
+4. A edição de um livro (Fundação, de 320 para 336 páginas) é gravada no banco.
+5. O estoque de Fundação na Biblioteca Central passa de 2 para 4 exemplares e é salvo.
+6. Um empréstimo atrasado é filtrado e devolvido; o gatilho do banco repõe o estoque.
+7. O leitor busca um livro, consulta a disponibilidade por biblioteca e solicita o
+   empréstimo; o estoque cai de 7 para 6.
+8. O novo empréstimo aparece no histórico do leitor com o prazo de devolução.
 
-### Limitações que não foram ocultadas
+Cada etapa é conferida pelo script (`validation.json`), e a captura falha se o
+navegador registrar qualquer erro de JavaScript.
 
-- Os livros administrativos, a ficha do leitor, as bibliotecas e o histórico
-  exibidos são exemplos definidos nos componentes React.
-- As edições de livros e estoque ficam no estado local da interface; não são
-  demonstrações de gravação no banco.
-- `/library`, `/user` e `/loan` são abertos diretamente durante a captura.
-  Os botões correspondentes de navegação ainda não executam essas mudanças de rota.
-- A tela de biblioteca possui campos com texto branco sobre fundo branco.
-  A gravação preserva esse estilo; na última etapa, o valor é selecionado com o
-  recurso nativo do navegador para ficar legível.
-- Os formulários de cadastro de livros e vinculação à biblioteca, o botão de
-  aluguel e os relatórios não são apresentados como fluxos completos.
-- O nome “Obi Wan Kenobi” e os demais exemplos vêm da interface original.
-  Nenhuma informação pessoal foi preenchida para a gravação.
+### Observações
+
+- As contas usadas são as de demonstração do `init.sql` (operador `admin` e o
+  leitor João Pedro). As senhas não aparecem nas imagens.
+- Respostas 4xx esperadas da API, como regras de negócio, não contam como erro.
+- Os dados de demonstração vêm do SQL original; nenhuma informação pessoal real
+  foi digitada durante a gravação.
 
 ## Como recriar os GIFs
 
 ### Requisitos
 
-- Node.js 20 ou superior, npm e Python 3.
+- Node.js 22.22 ou superior, npm e Python 3.
 - FFmpeg no `PATH`.
 - Pillow: `python3 -m pip install -r preview/tools/requirements.txt`.
   Se o sistema restringir instalações Python, use um ambiente virtual.
@@ -85,17 +86,16 @@ CHROME_PATH=/usr/bin/google-chrome npm run capture --prefix preview/tools
 
 O script:
 
-- cria um cluster PostgreSQL 16 isolado em um diretório temporário;
+- cria um cluster PostgreSQL 18 isolado em um diretório temporário;
 - importa `backend/database/init.sql` pelo protocolo COPY, preservando os dados;
 - escolhe portas locais livres e credenciais temporárias;
-- inicia o backend e o Vite, restritos a `127.0.0.1`;
-- usa o login de demonstração `admin/admin` sem gravar a senha em texto visível;
-- registra capturas e verifica os resultados das interações;
-- encerra os serviços e descarta o banco temporário após a captura.
+- gera o build de produção do frontend e o serve com `vite preview`, junto com
+  o backend, ambos restritos a `127.0.0.1`;
+- percorre os fluxos de operador e de leitor, verificando cada gravação;
+- encerra os serviços e apaga o banco e o build temporários.
 
-Os bancos e volumes existentes não são acessados. A pasta temporária usa
-`/tmp/opencode` quando disponível, ou o diretório temporário do sistema.
-Para escolher outro diretório existente, defina `PREVIEW_TMP`.
+Os bancos e volumes existentes não são acessados. Para usar outro diretório
+temporário, defina `PREVIEW_TMP`.
 
 ### 3. Compor e otimizar
 
@@ -113,11 +113,11 @@ alterados sem acrescentar telas fictícias.
 
 Os intermediários ficam em `preview/tools/.capture/`, ignorado pelo Git:
 
-- `review.jpg`: painel com as seis seções para inspeção visual.
-- `scenes.json`: ordem, duração, legendas e posições do cursor.
-- `validation.json`: verificações de navegação, login e interações.
+- `review.jpg`: painel com as oito seções para inspeção visual.
+- `scenes.json`: ordem, duração, rota, legendas e posições do cursor.
+- `validation.json`: verificações de cada etapa e erros do navegador.
 - `render-validation.json`: tamanho, resolução e duração dos GIFs.
-- `backend.log` e `frontend.log`: logs da execução.
+- `backend.log`, `frontend.log` e `frontend-build.log`: logs da execução.
 
 O renderizador verifica que os GIFs têm mais de um quadro, loop infinito,
 resolução esperada e tamanho inferior a 10 MiB por arquivo. Confira também
