@@ -1,4 +1,5 @@
 const ServiceApiUser = require("../services/apiUser");
+const sendError = require("../utils/sendError");
 const withoutPassword = require("../utils/withoutPassword");
 const service = new ServiceApiUser();
 
@@ -13,9 +14,7 @@ class ControllerApiUser {
         res.status(404).json({ message: "User not found." });
       }
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: "Error fetching user.", error: error.message });
+      sendError(res, error);
     }
   }
   async loginUser(req, res) {
@@ -62,7 +61,7 @@ class ControllerApiUser {
         result: withoutPassword(result),
       });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
   async update(req, res) {
@@ -75,7 +74,7 @@ class ControllerApiUser {
         result: withoutPassword(result),
       });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
 
@@ -92,7 +91,7 @@ class ControllerApiUser {
         res.status(404).json({ message: "User not found." });
       }
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
 }

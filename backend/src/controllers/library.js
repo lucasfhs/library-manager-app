@@ -1,4 +1,5 @@
 const ServiceLibrary = require("../services/library");
+const sendError = require("../utils/sendError");
 const service = new ServiceLibrary();
 class ControllerLibrary {
   async get(req, res) {
@@ -7,7 +8,7 @@ class ControllerLibrary {
       const library = await service.get(id);
       res.status(200).json(library);
     } catch (error) {
-      res.status(500).json({ message: "Library not exists." });
+      sendError(res, error);
     }
   }
   async getAll(req, res) {
@@ -15,7 +16,7 @@ class ControllerLibrary {
       const library = await service.getAll();
       res.status(200).json(library);
     } catch (error) {
-      res.status(500).json({ message: "Library not exists." });
+      sendError(res, error);
     }
   }
   async put(req, res) {
@@ -27,7 +28,7 @@ class ControllerLibrary {
         .status(200)
         .json({ message: "Library updated successfully.", result });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
   async post(req, res) {
@@ -39,7 +40,7 @@ class ControllerLibrary {
         result,
       });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
   async delete(req, res) {
@@ -50,7 +51,7 @@ class ControllerLibrary {
         .status(200)
         .json({ message: "Library deleted successfully.", result });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
 }

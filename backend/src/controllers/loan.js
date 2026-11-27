@@ -1,4 +1,5 @@
 const ServiceLoan = require("../services/loan");
+const sendError = require("../utils/sendError");
 const service = new ServiceLoan();
 class ControllerLoan {
   async get(req, res) {
@@ -7,7 +8,7 @@ class ControllerLoan {
       const loan = await service.get(id);
       res.status(200).json(loan);
     } catch (error) {
-      res.status(500).json({ message: "Loan not exists." });
+      sendError(res, error);
     }
   }
   async getAll(req, res) {
@@ -15,7 +16,7 @@ class ControllerLoan {
       const loan = await service.getAll();
       res.status(200).json(loan);
     } catch (error) {
-      res.status(500).json({ message: "Loan not exists." });
+      sendError(res, error);
     }
   }
   async put(req, res) {
@@ -32,7 +33,7 @@ class ControllerLoan {
       );
       res.status(200).json({ message: "Loan updated successfully.", result });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
   async post(req, res) {
@@ -50,7 +51,7 @@ class ControllerLoan {
         result,
       });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
   async delete(req, res) {
@@ -59,7 +60,7 @@ class ControllerLoan {
       const result = await service.delete(id);
       res.status(200).json({ message: "Loan deleted successfully.", result });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
 }

@@ -1,4 +1,5 @@
 const ServiceUser = require("../services/user");
+const sendError = require("../utils/sendError");
 const withoutPassword = require("../utils/withoutPassword");
 const service = new ServiceUser();
 class ControllerUser {
@@ -8,7 +9,7 @@ class ControllerUser {
       const user = await service.get(cpf);
       res.status(200).json(withoutPassword(user));
     } catch (error) {
-      res.status(500).json({ message: "User not exists." });
+      sendError(res, error);
     }
   }
   async getAll(req, res) {
@@ -16,7 +17,7 @@ class ControllerUser {
       const user = await service.getAll();
       res.status(200).json(withoutPassword(user));
     } catch (error) {
-      res.status(500).json({ message: "User not exists." });
+      sendError(res, error);
     }
   }
   async put(req, res) {
@@ -38,7 +39,7 @@ class ControllerUser {
         .status(200)
         .json({ message: "User updated successfully.", result: withoutPassword(result) });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
   async post(req, res) {
@@ -61,7 +62,7 @@ class ControllerUser {
           result: withoutPassword(result),
         });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
   async delete(req, res) {
@@ -70,7 +71,7 @@ class ControllerUser {
       const result = await service.delete(cpf);
       res.status(200).json({ message: "User deleted successfully.", result });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
 }

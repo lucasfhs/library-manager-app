@@ -193,3 +193,40 @@ describe("operator registration", () => {
     expect(response.status).toBe(403);
   });
 });
+
+describe("error statuses", () => {
+  const token = () => jwt.sign({ userLogin: "integration-test" }, process.env.SECRET_KEY);
+
+  test("missing records answer 404", async () => {
+    const response = await fetch(`${baseUrl}/book/999999`, {
+      headers: { Authorization: `Bearer ${token()}` },
+    });
+    expect(response.status).toBe(404);
+  });
+
+  test("duplicate titles answer 409", async () => {
+    const response = await post(
+      "/book",
+      { title: "Fundação", author: "Isaac Asimov", category: ["Ficção"], pages: 1, price: 1, language: "Português" },
+      token()
+    );
+    expect(response.status).toBe(409);
+  });
+
+  test("loan rules enforced by triggers answer 422 with their message", async () => {
+    // Ana Júlia has loans open for more than 30 days in the seed data.
+    const response = await post(
+      "/loan",
+      { cpfUser: "23611482005", idBook: 5, idLibrary: 4, dateLoan: "2026-01-10", dateReturn: null },
+      token()
+    );
+    const body = await response.json();
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/atrasados/);
+  });
+
+  test("missing fields answer 400", async () => {
+    const response = await post("/book", { title: "Sem autor" }, token());
+    expect(response.status).toBe(400);
+  });
+});

@@ -1,4 +1,5 @@
 const ServiceBookLibrary = require("../services/bookLibrary");
+const sendError = require("../utils/sendError");
 const service = new ServiceBookLibrary();
 class ControllerBookLibrary {
   async get(req, res) {
@@ -7,9 +8,7 @@ class ControllerBookLibrary {
       const bookLibrary = await service.get(id);
       res.status(200).json(bookLibrary);
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: "Book Library relationship not exists." });
+      sendError(res, error);
     }
   }
   async getAll(req, res) {
@@ -17,9 +16,7 @@ class ControllerBookLibrary {
       const bookLibrary = await service.getAll();
       res.status(200).json(bookLibrary);
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: "Book Library relationship not exists." });
+      sendError(res, error);
     }
   }
   async put(req, res) {
@@ -32,7 +29,7 @@ class ControllerBookLibrary {
         result,
       });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
   async post(req, res) {
@@ -44,7 +41,7 @@ class ControllerBookLibrary {
         result,
       });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
   async delete(req, res) {
@@ -56,7 +53,7 @@ class ControllerBookLibrary {
         result,
       });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
 }

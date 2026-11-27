@@ -1,4 +1,5 @@
 const ServiceBook = require("../services/book");
+const sendError = require("../utils/sendError");
 const service = new ServiceBook();
 class ControllerBook {
   async get(req, res) {
@@ -7,7 +8,7 @@ class ControllerBook {
       const book = await service.get(id);
       res.status(200).json(book);
     } catch (error) {
-      res.status(500).json({ message: "Book not exists." });
+      sendError(res, error);
     }
   }
   async getAll(req, res) {
@@ -15,7 +16,7 @@ class ControllerBook {
       const book = await service.getAll();
       res.status(200).json(book);
     } catch (error) {
-      res.status(500).json({ message: "Book not exists." });
+      sendError(res, error);
     }
   }
   async put(req, res) {
@@ -33,7 +34,7 @@ class ControllerBook {
       );
       res.status(200).json({ message: "Book updated successfully.", result });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
   async post(req, res) {
@@ -51,7 +52,7 @@ class ControllerBook {
         .status(201)
         .json({ message: "The book has been created successfully.", result });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
   async delete(req, res) {
@@ -60,7 +61,7 @@ class ControllerBook {
       const result = await service.delete(id);
       res.status(200).json({ message: "Book deleted successfully.", result });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      sendError(res, error);
     }
   }
 }
