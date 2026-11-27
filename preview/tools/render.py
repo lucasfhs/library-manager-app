@@ -90,9 +90,12 @@ def compose(scene, series, progress, pointer=None, pulse=False):
     for x, color in [(59, "#fb7771"), (79, "#f2c765"), (99, "#62d79b")]:
         draw.ellipse((x, 181, x+9, 190), fill=color)
     draw.rounded_rectangle((350, 175, 930, 197), radius=5, fill="#10231b")
-    address = f"localhost   /   library-manager   {scene['route']}"
+    # Pages outside the app (Stripe Checkout) record their host instead of a route.
+    address = (f"{scene['host']}   /   pagamento seguro" if scene.get("host")
+               else f"localhost   /   library-manager   {scene['route']}")
     draw.text((370, 175), address, font=FONTS["chrome"], fill=MUTED)
-    draw.text((1104, 175), "EXECUÇÃO LOCAL", font=FONTS["chrome"], fill=MUTED)
+    draw.text((1104, 175), "MODO DE TESTE" if scene.get("host") else "EXECUÇÃO LOCAL",
+              font=FONTS["chrome"], fill=MUTED)
     with Image.open(CAPTURE / scene["image"]) as screenshot:
         image.paste(screenshot.convert("RGB"), (40, 204))
 

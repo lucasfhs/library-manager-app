@@ -190,6 +190,8 @@ try {
       section,
       seconds,
       route: new URL(page.url()).pathname,
+      // Stripe's hosted pages carry session IDs in the path; only their host is shown.
+      host: page.url().startsWith(base) ? undefined : new URL(page.url()).host,
       labels: labels[section],
       pointer: box ? { x: box.x + box.width / 2, y: box.y + box.height / 2, clicked } : null,
       note: note ?? "Captura real da aplicação • API Express + PostgreSQL 18 • execução local",
@@ -409,39 +411,54 @@ try {
     await goto("/loan");
     const panel = page.getByRole("region", { name: "Multas por atraso" });
     await panel.getByText("Total em aberto").waitFor();
+    // Seven fines make the panel tall; bring it into view below the sticky header.
+    await panel.evaluate((element) => window.scrollTo({ top: element.getBoundingClientRect().top + window.scrollY - 84 }));
     await settle();
     await shot("fines", 2.4, panel.getByText("Total em aberto"));
     const pay = panel.getByRole("button", { name: /^Pagar R\$/ });
-    check("Fines listed for the reader (4 late loans)", (await panel.getByRole("listitem").count()) === 4);
+    check("Fines listed for the reader (7 late loans, R$ 243,60)", (await panel.getByRole("listitem").count()) === 7);
     await pay.hover();
     await shot("fines", 1, pay);
     const checkoutResponse = page.waitForResponse((r) => r.url().endsWith("/payment/checkout"));
     await pay.click();
     check("Checkout Session created through POST /payment/checkout", (await checkoutResponse).ok());
     await page.waitForURL(/checkout\.stripe\.com/, { timeout: 30000 });
-    await page.waitForLoadState("networkidle").catch(() => {});
-
-    // Stripe may group payment methods in an accordion; open the card form if so.
-    const cardTab = page.locator('[data-testid="card-accordion-item-button"]');
-    if (await cardTab.isVisible().catch(() => false)) await cardTab.click();
-    const cardNumber = page.locator("#cardNumber");
-    await cardNumber.waitFor({ timeout: 30000 });
-    await page.waitForTimeout(800);
-    await shot("checkout", 2, null, false, stripeNote);
-    const email = page.locator("#email");
-    if ((await email.isVisible().catch(() => false)) && !(await email.inputValue())) {
-      await email.fill("leitor.teste@example.com");
+    // Stripe renders the payment form inside its own iframe (Payment Element).
+    const form = page.frameLocator('iframe[src*="elements-inner-habanero"]');
+    const email = form.locator("#linkAuthentication-emailInput");
+    try {
+      await email.waitFor({ timeout: 30000 });
+    } catch (error) {
+      // Stripe changes its hosted page from time to time; leave evidence for the selectors.
+      await page.screenshot({ path: path.join(output, "stripe-debug.png"), fullPage: true });
+      throw error;
     }
+    await page.waitForTimeout(1200);
+    await shot("checkout", 2, null, false, stripeNote);
+    // With several payment methods (card, Pix…) Stripe asks which one first.
+    const cardChoice = form.getByRole("button", { name: /^Cartão/ });
+    if (await cardChoice.isVisible().catch(() => false)) {
+      const choiceBox = await cardChoice.boundingBox();
+      await cardChoice.click();
+      await shot("checkout", 0.6, choiceBox, true, stripeNote);
+    }
+    const cardNumber = form.locator("#payment-numberInput");
+    await cardNumber.waitFor({ timeout: 15000 });
+    await page.waitForTimeout(500);
     await cardNumber.pressSequentially("4242424242424242", { delay: 25 });
-    await shot("checkout", 0.6, cardNumber, false, stripeNote);
-    await page.locator("#cardExpiry").pressSequentially("1234", { delay: 25 });
-    await page.locator("#cardCvc").pressSequentially("123", { delay: 25 });
-    const holder = page.locator("#billingName");
+    await shot("checkout", 0.7, cardNumber, false, stripeNote);
+    await form.locator("#payment-expiryInput").pressSequentially("1234", { delay: 25 });
+    await form.locator("#payment-cvcInput").pressSequentially("123", { delay: 25 });
+    const holder = form.locator("#payment-nameInput");
     await holder.fill("Ana Julia");
-    const postal = page.locator("#billingPostalCode");
-    if (await postal.isVisible().catch(() => false)) await postal.fill("20000000");
+    const country = form.locator("#payment-countryInput");
+    if (await country.isVisible().catch(() => false)) await country.selectOption("BR");
+    // Saving the card with Link would ask for a phone number; this demo pays once.
+    const linkOptIn = form.locator("#payment-linkOptInInput");
+    if ((await linkOptIn.isVisible().catch(() => false)) && (await linkOptIn.isChecked())) await linkOptIn.uncheck();
+    await page.waitForTimeout(400);
     await shot("checkout", 1.4, holder, false, stripeNote);
-    const submit = page.locator('[data-testid="hosted-payment-submit-button"]');
+    const submit = form.getByTestId("payment-form-submit-button");
     await submit.hover();
     await shot("checkout", 0.8, submit, false, stripeNote);
     await submit.click();
@@ -449,6 +466,7 @@ try {
     await page.evaluate(() => document.fonts.ready);
     await toast("Pagamento confirmado").waitFor({ timeout: 20000 });
     await panel.getByText("Todas as multas estão pagas").waitFor();
+    await panel.evaluate((element) => window.scrollTo({ top: element.getBoundingClientRect().top + window.scrollY - 84 }));
     await settle();
     await shot("paid", 1.6, toast("Pagamento confirmado"));
     await shot("paid", 2.4, panel.getByText("Todas as multas estão pagas"));
