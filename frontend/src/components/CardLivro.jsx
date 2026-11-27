@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import BibliotecasPopup from "./BibliotecasPopup.jsx";
 
 function CardLivro() {

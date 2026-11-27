@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 function CardLivroUpdate({ livro, onAlterar }) {
   const [formDados, setFormDados] = useState(livro);

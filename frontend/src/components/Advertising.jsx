@@ -1,5 +1,4 @@
-import React from "react";
-import Lottie from "lottie-react";
+import { Lottie } from "lottie-react";
 import animationData from "../assets/animation/LivroAnimacao.json";
 function Advertising() {
   return (
@@ -12,11 +11,7 @@ function Advertising() {
 
       {/* Espaço reservado para a animação */}
       <div className="w-full max-w-md h-64 sm:h-80 rounded-lg flex items-center justify-center ">
-        <Lottie
-          animationData={animationData}
-          loop={true}
-          style={{ width: "100%", height: "100%" }}
-        ></Lottie>
+        <Lottie src={animationData} autoplay loop />
       </div>
     </div>
   );

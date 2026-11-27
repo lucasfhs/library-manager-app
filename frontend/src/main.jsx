@@ -1,11 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import "./App.css";
+import { createBrowserRouter, RouterProvider } from "react-router";
 import "./index.css";
-import Contact from "./routes/Contact.jsx";
 import ErrorPage from "./routes/ErrorPage.jsx";
-import ContactDetails from "./routes/ContactDetails.jsx";
 import LoginUser from "./pages/LoginUser.jsx";
 import LoginAdmin from "./pages/LoginAdmin.jsx";
 import RegisterUser from "./pages/RegisterUser.jsx";
@@ -20,14 +17,6 @@ const router = createBrowserRouter([
     path: "/",
     element: <LandingPage></LandingPage>,
     errorElement: <ErrorPage></ErrorPage>,
-  },
-  {
-    path: "/contact",
-    element: <Contact></Contact>,
-  },
-  {
-    path: "/contact/:id",
-    element: <ContactDetails></ContactDetails>,
   },
   {
     path: "/loginUser",

@@ -1,4 +1,4 @@
-import { BookCheck } from "lucide-react";
+
 import CardLoginUser from "../components/CardLoginUser";
 import Footer from "../components/Footer";
 import Header from "../components/Header";

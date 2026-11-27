@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 function CardBibliotecaUpdate({ dado, onAlterar }) {
   const [editando, setEditando] = useState(false);

@@ -1,5 +1,4 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 function CardWebsiteAccess() {
   return (
     <div className="h-full flex p-4 sm:p-14 justify-center items-center bg-gray-800">
