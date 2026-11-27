@@ -120,11 +120,10 @@ export default function LandingPage() {
                   <Link to="/loginAdmin">Entrar como operador</Link>
                 </Button>
               </div>
-              <dl className="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t pt-6 text-sm">
+              <dl className="mt-12 grid max-w-lg grid-cols-2 gap-6 border-t pt-6 text-sm">
                 {[
                   ["Perfis", "Leitor e operador"],
                   ["Prazo", `${LOAN_PERIOD_DAYS} dias por empréstimo`],
-                  ["Regras", "Validadas no PostgreSQL"],
                 ].map(([term, detail]) => (
                   <div key={term}>
                     <dt className="text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">{term}</dt>
