@@ -9,7 +9,7 @@ export default function NotFoundPage() {
   return (
     <main className="grid min-h-svh place-items-center bg-background px-6">
       <div className="max-w-md animate-fade-up text-center">
-        <BrandLogo className="text-2xl" withMark />
+        <BrandLogo className="text-2xl" />
         <p className="mt-10 font-heading text-7xl font-semibold tracking-tight text-brand-ink">
           {notFound ? "404" : "Ops"}
         </p>

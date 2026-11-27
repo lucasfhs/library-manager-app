@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/public-sans";
+@import "@fontsource-variable/plus-jakarta-sans";
 @import "@fontsource-variable/playfair-display";
 @import "@fontsource-variable/playfair-display/wght-italic.css";
 
@@ -20,6 +21,7 @@
   --color-india-green: #358600;
   --color-rich-black: #0d1321;
   --font-playfair: "Playfair Display Variable", Georgia, serif;
+  --font-brand: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
 
   --animate-fade-up: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-fade-in: fade-in 0.4s ease-out both;

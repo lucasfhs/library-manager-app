@@ -6,7 +6,7 @@ export function SiteFooter() {
     <footer className="border-t bg-card/50">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-5 py-10 sm:px-8 md:flex-row md:items-start md:justify-between">
         <div className="space-y-3">
-          <BrandLogo withMark className="text-xl" />
+          <BrandLogo className="text-xl" />
           <p className="max-w-xs text-sm text-muted-foreground">Sua central de leitura e aprendizado desde 2025.</p>
         </div>
         <nav aria-label="Rodapé" className="grid grid-cols-2 gap-x-12 gap-y-2 text-sm sm:grid-cols-3">

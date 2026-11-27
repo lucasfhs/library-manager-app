@@ -8,7 +8,7 @@ import {
   UsersIcon,
 } from "lucide-react";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
-import { BrandLogo, BrandMark } from "@/components/brand-logo";
+import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 import { Separator } from "@/components/ui/separator";
@@ -87,8 +87,14 @@ function AdminSidebar() {
     <Sidebar collapsible="icon" className="border-r-0">
       <SidebarHeader className="h-16 justify-center px-3">
         <Link to="/admin" className="flex items-center gap-2 overflow-hidden rounded-md text-lg text-white">
-          <BrandMark onDark className="size-8" />
-          <BrandLogo className="group-data-[collapsible=icon]:hidden" />
+          <BrandLogo onDark className="px-1 group-data-[collapsible=icon]:hidden" />
+          {/* Collapsed sidebar: the initials keep the brand visible in the narrow rail. */}
+          <span
+            aria-hidden="true"
+            className="hidden w-full text-center font-brand text-base font-extrabold tracking-tight text-spring-green group-data-[collapsible=icon]:block"
+          >
+            LM
+          </span>
         </Link>
       </SidebarHeader>
       <SidebarContent>

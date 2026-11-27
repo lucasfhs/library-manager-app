@@ -29,7 +29,7 @@ export function AuthLayout({ aside, children }: AuthLayoutProps) {
           to="/"
           className="relative w-fit rounded-md text-2xl text-white focus-visible:ring-3 focus-visible:ring-spring-green/50 focus-visible:outline-none"
         >
-          <BrandLogo withMark onDark />
+          <BrandLogo onDark />
         </Link>
         <div className="relative mt-auto max-w-md">
           <p className="text-xs font-semibold tracking-[0.16em] text-spring-green uppercase">{aside.eyebrow}</p>
@@ -67,7 +67,7 @@ export function AuthLayout({ aside, children }: AuthLayoutProps) {
         </div>
         <div className="mx-auto flex w-full max-w-[26rem] flex-1 flex-col justify-center py-10">
           <Link to="/" className="mb-10 w-fit text-2xl lg:hidden">
-            <BrandLogo withMark />
+            <BrandLogo />
           </Link>
           <div className="animate-fade-up">{children}</div>
         </div>

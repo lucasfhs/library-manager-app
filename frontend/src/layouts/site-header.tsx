@@ -21,7 +21,7 @@ export function SiteHeader() {
           to="/"
           className="rounded-md text-[1.375rem] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
         >
-          <BrandLogo withMark />
+          <BrandLogo />
         </Link>
         <nav aria-label="Principal" className="hidden items-center gap-1 text-sm md:flex">
           <Button variant="ghost" asChild>
