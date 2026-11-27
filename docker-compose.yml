@@ -27,6 +27,11 @@ services:
   backend:
     build:
       context: ./backend
+    # Optional: STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET come from backend/.env.
+    # The variables below take precedence over anything in that file.
+    env_file:
+      - path: ./backend/.env
+        required: false
     environment:
       PORT: 3000
       DB_HOST: database
@@ -38,6 +43,7 @@ services:
       SECRET_KEY: ${SECRET_KEY:-local-development-secret}
       OPERATOR_REGISTRATION_KEY: ${OPERATOR_REGISTRATION_KEY:-Admin}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+      APP_URL: ${APP_URL:-http://localhost:8080}
     ports:
       - "${BACKEND_PORT:-3000}:3000"
     depends_on:

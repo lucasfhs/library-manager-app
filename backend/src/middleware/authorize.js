@@ -20,6 +20,18 @@ const readerRules = [
     owns: (session, match) => match[1] === session.cpfUser,
   },
   {
+    method: "GET",
+    path: /^\/payment\/fines\/([^/]+)$/,
+    owns: (session, match) => match[1] === session.cpfUser,
+  },
+  {
+    method: "POST",
+    path: /^\/payment\/checkout$/,
+    owns: (session, _match, req) => req.body?.cpfUser === session.cpfUser,
+  },
+  // The service checks that the Checkout Session belongs to the reader.
+  { method: "POST", path: /^\/payment\/confirm\/[\w-]+$/ },
+  {
     method: "POST",
     path: /^\/loan$/,
     owns: (session, _match, req) => req.body?.cpfUser === session.cpfUser,

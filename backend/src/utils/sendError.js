@@ -1,5 +1,7 @@
 // Maps errors from repositories and PostgreSQL to HTTP responses so clients
 // can tell a broken rule from a server failure.
+const HttpError = require("./httpError");
+
 const pgStatus = {
   23505: 409, // unique_violation
   23503: 409, // foreign_key_violation
@@ -13,6 +15,7 @@ const pgStatus = {
 };
 
 function statusFor(error) {
+  if (error instanceof HttpError) return error.status;
   if (error?.code && pgStatus[error.code]) return pgStatus[error.code];
   const message = String(error?.message ?? "");
   if (/cannot be null/i.test(message)) return 400;
@@ -22,7 +25,7 @@ function statusFor(error) {
 
 function sendError(res, error) {
   const status = statusFor(error);
-  if (status >= 500) {
+  if (status >= 500 && !(error instanceof HttpError)) {
     console.error(error);
     return res.status(status).json({ message: "Internal server error." });
   }

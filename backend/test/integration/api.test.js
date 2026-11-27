@@ -230,3 +230,69 @@ describe("error statuses", () => {
     expect(response.status).toBe(400);
   });
 });
+
+describe("late-fee payments", () => {
+  const ana = "23611482005";
+  const readerToken = (cpfUser) => jwt.sign({ cpfUser, role: "reader" }, process.env.SECRET_KEY);
+  const get = (path, token) => fetch(`${baseUrl}${path}`, { headers: { Authorization: `Bearer ${token}` } });
+
+  test("fines accrue R$ 1,00 per late day, capped at the book price", async () => {
+    const response = await get(`/payment/fines/${ana}`, readerToken(ana));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.finePerDayCents).toBe(100);
+    expect(body.loans.map((loan) => loan.loanId)).toEqual([1, 16, 24, 25]);
+    // Every one of Ana Júlia's loans is late long enough to reach its book's price.
+    expect(body.loans.map((loan) => loan.fineCents)).toEqual([4290, 4290, 5990, 4500]);
+    expect(body.totalDueCents).toBe(19070);
+  });
+
+  test("a confirmed payment settles the fine", async () => {
+    await database.query(
+      `INSERT INTO pagamento_multa (id_emprestimo, cpf_usuario, stripe_session_id, valor_centavos, status, pago_em)
+       VALUES (1, $1, 'cs_integration_test', 4290, 'pago', now())`,
+      [ana]
+    );
+    try {
+      const body = await (await get(`/payment/fines/${ana}`, readerToken(ana))).json();
+      expect(body.loans[0]).toMatchObject({ loanId: 1, paidCents: 4290, dueCents: 0 });
+      expect(body.totalDueCents).toBe(19070 - 4290);
+    } finally {
+      await database.query("DELETE FROM pagamento_multa WHERE stripe_session_id = 'cs_integration_test'");
+    }
+  });
+
+  test("readers cannot see another reader's fines", async () => {
+    const response = await get(`/payment/fines/${ana}`, readerToken("32168781044"));
+    expect(response.status).toBe(403);
+  });
+
+  test("checkout answers 503 while Stripe is not configured", async () => {
+    const previous = process.env.STRIPE_SECRET_KEY;
+    delete process.env.STRIPE_SECRET_KEY;
+    try {
+      const response = await post("/payment/checkout", { cpfUser: ana }, readerToken(ana));
+      expect(response.status).toBe(503);
+      expect(await response.json()).toEqual({ message: "Payments are not configured." });
+    } finally {
+      if (previous) process.env.STRIPE_SECRET_KEY = previous;
+    }
+  });
+
+  test("the webhook is public but needs a valid Stripe signature", async () => {
+    const previous = process.env.STRIPE_WEBHOOK_SECRET;
+    process.env.STRIPE_WEBHOOK_SECRET = "whsec_integration";
+    process.env.STRIPE_SECRET_KEY ||= "sk_test_integration";
+    try {
+      const response = await fetch(`${baseUrl}/payment/webhook`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Stripe-Signature": "t=1,v1=bad" },
+        body: JSON.stringify({ type: "checkout.session.completed" }),
+      });
+      expect(response.status).toBe(400);
+    } finally {
+      process.env.STRIPE_WEBHOOK_SECRET = previous ?? "";
+    }
+  });
+});

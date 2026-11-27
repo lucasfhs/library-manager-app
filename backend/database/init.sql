@@ -708,6 +708,60 @@ ALTER TABLE ONLY public.livro_biblioteca
 
 
 --
+-- Name: pagamento_multa; Type: TABLE; Schema: public; Owner: gomes_library_system_user
+--
+-- Late-fee payments made through Stripe Checkout. One row per loan included in a
+-- Checkout Session; a fine is settled by the rows whose status is 'pago'.
+--
+
+CREATE TABLE public.pagamento_multa (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_emprestimo integer NOT NULL REFERENCES public.emprestimo(id),
+    cpf_usuario character(11) NOT NULL REFERENCES public.usuario(cpf),
+    stripe_session_id text NOT NULL,
+    valor_centavos integer NOT NULL CONSTRAINT pagamento_multa_valor_check CHECK (valor_centavos > 0),
+    status text DEFAULT 'pendente' NOT NULL CONSTRAINT pagamento_multa_status_check CHECK (status IN ('pendente', 'pago', 'expirado')),
+    criado_em timestamp with time zone DEFAULT now() NOT NULL,
+    pago_em timestamp with time zone,
+    CONSTRAINT pagamento_multa_sessao_emprestimo_key UNIQUE (stripe_session_id, id_emprestimo)
+);
+
+
+ALTER TABLE public.pagamento_multa OWNER TO gomes_library_system_user;
+
+CREATE INDEX pagamento_multa_cpf_usuario_idx ON public.pagamento_multa USING btree (cpf_usuario);
+
+
+--
+-- Name: multa_emprestimo; Type: VIEW; Schema: public; Owner: gomes_library_system_user
+--
+-- Fine per loan: R$ 1,00 for each day past the 30-day loan period, counted until
+-- the return date (or today while the book is still out) and capped at the book's
+-- price. pago_centavos sums the confirmed Stripe payments for that loan.
+--
+
+CREATE VIEW public.multa_emprestimo AS
+ SELECT e.id AS id_emprestimo,
+    e.cpf_usuario,
+    l.titulo AS livro,
+    b.nome AS biblioteca,
+    e.data_emprestimo,
+    e.data_devolucao,
+    (e.data_emprestimo + 30) AS data_limite,
+    GREATEST((COALESCE(e.data_devolucao, CURRENT_DATE) - (e.data_emprestimo + 30)), 0) AS dias_atraso,
+    LEAST((GREATEST((COALESCE(e.data_devolucao, CURRENT_DATE) - (e.data_emprestimo + 30)), 0) * 100), (round((l.preco * (100)::numeric)))::integer) AS multa_centavos,
+    (COALESCE(( SELECT sum(p.valor_centavos) AS sum
+           FROM public.pagamento_multa p
+          WHERE ((p.id_emprestimo = e.id) AND (p.status = 'pago'::text))), (0)::bigint))::integer AS pago_centavos
+   FROM ((public.emprestimo e
+     JOIN public.livro l ON ((l.id = e.id_livro)))
+     JOIN public.biblioteca b ON ((b.id = e.id_biblioteca)));
+
+
+ALTER VIEW public.multa_emprestimo OWNER TO gomes_library_system_user;
+
+
+--
 -- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: -; Owner: postgres
 --
 

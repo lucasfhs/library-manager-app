@@ -56,4 +56,11 @@ describe("authorize middleware", () => {
   test("tokens without a known identity are refused", () => {
     expect(run({}, "GET", "/book").allowed).toBe(false);
   });
+  test("readers only see and pay their own fines", () => {
+    expect(run(reader, "GET", "/payment/fines/32168781044").allowed).toBe(true);
+    expect(run(reader, "GET", "/payment/fines/90202975037").allowed).toBe(false);
+    expect(run(reader, "POST", "/payment/checkout", { cpfUser: "32168781044" }).allowed).toBe(true);
+    expect(run(reader, "POST", "/payment/checkout", { cpfUser: "90202975037" }).allowed).toBe(false);
+    expect(run(reader, "POST", "/payment/confirm/cs_test_a1B2").allowed).toBe(true);
+  });
 });

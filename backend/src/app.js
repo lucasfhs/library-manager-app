@@ -13,6 +13,8 @@ const libraryRouter = require("./routers/library");
 const bookLibraryRouter = require("./routers/bookLibrary");
 const loanRouter = require("./routers/loan");
 const reportRouter = require("./routers/report");
+const paymentRouter = require("./routers/payment");
+const paymentWebhookRouter = require("./routers/paymentWebhook");
 
 const app = express();
 const allowedOrigins = process.env.CORS_ORIGIN
@@ -21,6 +23,7 @@ const allowedOrigins = process.env.CORS_ORIGIN
 
 app.disable("x-powered-by");
 app.use(cors({ origin: allowedOrigins }));
+app.use(paymentWebhookRouter);
 app.use(express.json());
 // Express 5 leaves req.body undefined when no body was parsed; controllers
 // destructure it, so keep the Express 4 behaviour of an empty object.
@@ -51,6 +54,7 @@ app.use(libraryRouter);
 app.use(bookLibraryRouter);
 app.use(loanRouter);
 app.use(reportRouter);
+app.use(paymentRouter);
 
 app.use((_req, res) =>
   res.status(404).json({ message: "Route not found." })

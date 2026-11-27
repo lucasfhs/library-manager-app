@@ -14,6 +14,7 @@ test.each([
   [new Error("Title cannot be null."), 400],
   [new Error("Book not exists."), 404],
   [new Error("connection terminated"), 500],
+  [new (require("../../src/utils/httpError"))(503, "Payments are not configured."), 503],
 ])("maps %o to %i", (error, status) => {
   expect(statusFor(error)).toBe(status);
 });
