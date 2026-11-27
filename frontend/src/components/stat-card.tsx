@@ -21,7 +21,7 @@ export function StatCard({ label, value, hint, icon, loading, className }: StatC
           {loading ? (
             <Skeleton className="h-8 w-16" />
           ) : (
-            <p className="font-heading text-3xl font-semibold tracking-tight tabular">{value}</p>
+            <p className="text-3xl font-semibold tracking-tight tabular">{value}</p>
           )}
           {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
         </div>
