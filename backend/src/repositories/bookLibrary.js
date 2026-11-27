@@ -6,7 +6,7 @@ class RepositoryBookLibrary {
         throw new Error("IdBook cannot be null.");
       } else if (!idLibrary) {
         throw new Error("IdLibrary cannot be null.");
-      } else if (!amount) {
+      } else if (amount === undefined || amount === null || amount === "") {
         throw new Error("Amount cannot be null.");
       }
       const newBookLibrary = await BookLibrary.create(
@@ -50,7 +50,7 @@ class RepositoryBookLibrary {
         throw new Error("IdBook cannot be null.");
       } else if (!idLibrary) {
         throw new Error("IdLibrary cannot be null.");
-      } else if (!amount) {
+      } else if (amount === undefined || amount === null || amount === "") {
         throw new Error("Amount cannot be null.");
       }
       const newBookLibrary = await BookLibrary.update(

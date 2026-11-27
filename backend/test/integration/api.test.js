@@ -137,3 +137,27 @@ test("loan dates are serialized as calendar dates", async () => {
   expect(body.dataEmprestimo).toBe("2024-01-01");
   expect(body.dataDevolucao).toBe("2024-01-10");
 });
+
+test("library stock can be set to zero", async () => {
+  const token = jwt.sign({ userLogin: "integration-test" }, process.env.SECRET_KEY);
+  const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+  const original = await (await fetch(`${baseUrl}/bookLibrary/6`, { headers })).json();
+
+  const response = await fetch(`${baseUrl}/bookLibrary/6`, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify({ idBook: original.idLivro, idLibrary: original.idBiblioteca, amount: 0 }),
+  });
+  expect(response.status).toBe(200);
+  expect((await response.json()).result.quantidadeDisponivel).toBe(0);
+
+  await fetch(`${baseUrl}/bookLibrary/6`, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify({
+      idBook: original.idLivro,
+      idLibrary: original.idBiblioteca,
+      amount: original.quantidadeDisponivel,
+    }),
+  });
+});
