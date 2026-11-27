@@ -2,13 +2,14 @@ name: library-manager-app
 
 services:
   database:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-gomes_library_system}
       POSTGRES_USER: ${POSTGRES_USER:-gomes_library_system_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-library_manager_password}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # PostgreSQL 18 images keep versioned data directories under this path.
+      - postgres18_data:/var/lib/postgresql
       - ./backend/database/init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
     ports:
       - "127.0.0.1:${DATABASE_PORT:-5432}:5432"
@@ -71,4 +72,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  postgres_data:
+  postgres18_data:
