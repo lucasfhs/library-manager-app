@@ -94,7 +94,7 @@ function AdminSidebar() {
       <SidebarContent>
         {adminNavigation.map((group) => (
           <SidebarGroup key={group.label}>
-            <SidebarGroupLabel className="text-[11px] tracking-[0.14em] text-sidebar-foreground/50 uppercase">
+            <SidebarGroupLabel className="text-[11px] tracking-[0.14em] text-sidebar-foreground/75 uppercase">
               {group.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>

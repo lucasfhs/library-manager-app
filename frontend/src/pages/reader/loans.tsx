@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LOAN_PERIOD_DAYS, MAX_OPEN_LOANS, loanStatus, type LoanStatus } from "@/lib/domain";
 import { formatDate, parseDate } from "@/lib/format";
 import { useCatalog, useReaderLoans } from "@/lib/queries";
@@ -92,8 +92,8 @@ export default function ReaderLoansPage() {
           <TabsTrigger value="open">Em aberto</TabsTrigger>
           <TabsTrigger value="returned">Devolvidos</TabsTrigger>
         </TabsList>
-      </Tabs>
 
+      <TabsContent value={filter} className="mt-6">
       {loans.isPending ? (
         <Card className="gap-0 p-0">
           {Array.from({ length: 4 }, (_, index) => (
@@ -173,6 +173,8 @@ export default function ReaderLoansPage() {
           </Table>
         </Card>
       )}
+      </TabsContent>
+      </Tabs>
     </div>
   );
 }

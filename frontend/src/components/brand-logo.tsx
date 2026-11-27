@@ -25,6 +25,7 @@ export function BrandLogo({ className, withMark = false, onDark = false }: Brand
   return (
     <span
       className={cn("inline-flex items-center gap-2.5 font-playfair leading-none whitespace-nowrap", className)}
+      role="img"
       aria-label="Library Manager"
     >
       {withMark && <BrandMark onDark={onDark} />}

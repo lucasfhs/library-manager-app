@@ -12,7 +12,7 @@ import { Card } from "@/components/ui/card";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { describeError } from "@/lib/api";
 import { LOAN_PERIOD_DAYS, type LoanStatus } from "@/lib/domain";
 import { daysSince, formatCpf, formatDate, today } from "@/lib/format";
@@ -94,8 +94,8 @@ export default function LoansPage() {
         }
       />
 
+      <Tabs value={status} onValueChange={(value) => setParam("status", value === "all" ? null : value)}>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <Tabs value={status} onValueChange={(value) => setParam("status", value === "all" ? null : value)}>
           <TabsList>
             {filters.map((filter) => (
               <TabsTrigger key={filter.value} value={filter.value} className="gap-1.5">
@@ -108,7 +108,6 @@ export default function LoansPage() {
               </TabsTrigger>
             ))}
           </TabsList>
-        </Tabs>
         <InputGroup className="lg:max-w-xs">
           <InputGroupAddon>
             <SearchIcon />
@@ -123,6 +122,7 @@ export default function LoansPage() {
         </InputGroup>
       </div>
 
+      <TabsContent value={status} className="mt-6">
       {error ? (
         <ErrorState error={error} onRetry={refetch} />
       ) : !isPending && visible.length === 0 ? (
@@ -206,6 +206,8 @@ export default function LoansPage() {
           </Table>
         </Card>
       )}
+      </TabsContent>
+      </Tabs>
 
       <LoanFormDialog open={creating} onOpenChange={(open) => setParam("novo", open ? "1" : null)} />
       <ConfirmDialog
