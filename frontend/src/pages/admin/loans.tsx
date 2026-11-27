@@ -102,18 +102,20 @@ export default function LoansPage() {
 
       <Tabs value={status} onValueChange={(value) => setParam("status", value === "all" ? null : value)}>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <TabsList>
-            {filters.map((filter) => (
-              <TabsTrigger key={filter.value} value={filter.value} className="gap-1.5">
-                {filter.label}
-                {!isPending && (
-                  <span className="rounded-full bg-background/70 px-1.5 text-[11px] text-muted-foreground tabular group-data-[state=active]:text-foreground">
-                    {counts[filter.value]}
-                  </span>
-                )}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+            <TabsList>
+              {filters.map((filter) => (
+                <TabsTrigger key={filter.value} value={filter.value} className="gap-1.5">
+                  {filter.label}
+                  {!isPending && (
+                    <span className="rounded-full bg-background/70 px-1.5 text-[11px] text-muted-foreground tabular group-data-[state=active]:text-foreground">
+                      {counts[filter.value]}
+                    </span>
+                  )}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
           <InputGroup className="lg:max-w-xs">
             <InputGroupAddon>
               <SearchIcon />
@@ -146,7 +148,7 @@ export default function LoansPage() {
                     <TableHead className="hidden xl:table-cell">Biblioteca</TableHead>
                     <TableHead className="hidden sm:table-cell">Retirada</TableHead>
                     <TableHead className="hidden lg:table-cell">Devolução</TableHead>
-                    <TableHead>Situação</TableHead>
+                    <TableHead className="hidden sm:table-cell">Situação</TableHead>
                     <TableHead className="pr-5 text-right">
                       <span className="sr-only">Ações</span>
                     </TableHead>
@@ -182,6 +184,7 @@ export default function LoansPage() {
                                     {reader?.nome ?? formatCpf(loan.cpfUsuario)}
                                   </p>
                                   <p className="text-xs text-muted-foreground tabular">#{loan.id}</p>
+                                  <LoanStatusBadge status={row.status} className="mt-1 sm:hidden" />
                                 </div>
                               </div>
                             </TableCell>
@@ -208,14 +211,19 @@ export default function LoansPage() {
                                 </span>
                               )}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="hidden sm:table-cell">
                               <LoanStatusBadge status={row.status} />
                             </TableCell>
                             <TableCell className="pr-5 text-right">
                               {!loan.dataDevolucao && (
-                                <Button size="sm" variant="outline" onClick={() => setReturning(row)}>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  aria-label={`Registrar devolução de ${book?.titulo ?? "livro"}`}
+                                  onClick={() => setReturning(row)}
+                                >
                                   <UndoDotIcon data-icon="inline-start" />
-                                  Devolver
+                                  <span className="hidden sm:inline">Devolver</span>
                                 </Button>
                               )}
                             </TableCell>
