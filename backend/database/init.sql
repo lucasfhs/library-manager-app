@@ -443,6 +443,9 @@ COPY public.emprestimo (id, cpf_usuario, id_livro, id_biblioteca, data_emprestim
 3	90202975037	3	2	2024-01-03	2024-01-15
 4	23854652054	4	3	2023-12-28	\N
 5	87359218039	5	4	2023-12-30	\N
+26	23611482005	19	1	2024-03-01	2024-04-12
+27	23611482005	20	2	2024-05-06	2024-07-05
+28	23611482005	10	3	2024-08-01	2024-10-15
 1	23611482005	1	1	2024-01-02	2025-01-29
 16	23611482005	1	1	2025-01-29	\N
 24	23611482005	2	1	2025-02-18	\N
@@ -530,7 +533,7 @@ SELECT pg_catalog.setval('public.biblioteca_id_seq', 11, true);
 -- Name: emprestimo_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gomes_library_system_user
 --
 
-SELECT pg_catalog.setval('public.emprestimo_id_seq', 25, true);
+SELECT pg_catalog.setval('public.emprestimo_id_seq', 28, true);
 
 
 --

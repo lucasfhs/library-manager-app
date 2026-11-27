@@ -242,10 +242,11 @@ describe("late-fee payments", () => {
 
     expect(response.status).toBe(200);
     expect(body.finePerDayCents).toBe(100);
-    expect(body.loans.map((loan) => loan.loanId)).toEqual([1, 16, 24, 25]);
-    // Every one of Ana Júlia's loans is late long enough to reach its book's price.
-    expect(body.loans.map((loan) => loan.fineCents)).toEqual([4290, 4290, 5990, 4500]);
-    expect(body.totalDueCents).toBe(19070);
+    expect(body.loans.map((loan) => loan.loanId)).toEqual([1, 26, 27, 28, 16, 24, 25]);
+    // Returned 12 and 30 days late; the others reach their book's price.
+    expect(body.loans.map((loan) => loan.fineCents)).toEqual([4290, 1200, 3000, 1090, 4290, 5990, 4500]);
+    expect(body.loans.find((loan) => loan.loanId === 26)).toMatchObject({ daysLate: 12, dueCents: 1200 });
+    expect(body.totalDueCents).toBe(24360);
   });
 
   test("a confirmed payment settles the fine", async () => {
@@ -257,7 +258,7 @@ describe("late-fee payments", () => {
     try {
       const body = await (await get(`/payment/fines/${ana}`, readerToken(ana))).json();
       expect(body.loans[0]).toMatchObject({ loanId: 1, paidCents: 4290, dueCents: 0 });
-      expect(body.totalDueCents).toBe(19070 - 4290);
+      expect(body.totalDueCents).toBe(24360 - 4290);
     } finally {
       await database.query("DELETE FROM pagamento_multa WHERE stripe_session_id = 'cs_integration_test'");
     }
