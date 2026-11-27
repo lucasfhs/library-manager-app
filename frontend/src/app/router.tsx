@@ -5,7 +5,6 @@ import { RequireRole } from "@/components/require-role";
 import { AdminLayout } from "@/layouts/admin-layout";
 import { ReaderLayout } from "@/layouts/reader-layout";
 import NotFoundPage from "@/pages/not-found";
-import BibliotecaPage from "@/components/BibliotecaPage.jsx";
 
 const page = (load: () => Promise<{ default: ComponentType }>) => async () => ({ Component: (await load()).default });
 
@@ -57,7 +56,11 @@ export const router = createBrowserRouter([
         children: [
           { path: "admin", lazy: page(() => import("@/pages/admin/overview")) },
           { path: "admin/books", lazy: page(() => import("@/pages/admin/books")) },
-          { path: "library", element: <BibliotecaPage /> },
+          { path: "library", lazy: page(() => import("@/pages/admin/inventory")) },
+          { path: "admin/libraries", lazy: page(() => import("@/pages/admin/libraries")) },
+          { path: "admin/loans", lazy: page(() => import("@/pages/admin/loans")) },
+          { path: "admin/readers", lazy: page(() => import("@/pages/admin/readers")) },
+          { path: "admin/reports", lazy: page(() => import("@/pages/admin/reports")) },
         ],
       },
       { path: "*", element: <NotFoundPage /> },

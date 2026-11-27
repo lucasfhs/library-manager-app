@@ -54,6 +54,7 @@ export default function BooksPage() {
       setDeleting(null);
     } catch (error) {
       toast.error("Não foi possível remover o livro", { description: describeError(error) });
+      setDeleting(null);
     }
   };
 
