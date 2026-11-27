@@ -161,3 +161,35 @@ test("library stock can be set to zero", async () => {
     }),
   });
 });
+
+test("books by category lists each category once", async () => {
+  const token = jwt.sign({ userLogin: "integration-test" }, process.env.SECRET_KEY);
+  const response = await fetch(`${baseUrl}/report/getBooksByCategory`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const body = await response.json();
+  const names = body.map((row) => row.categoria);
+
+  expect(response.status).toBe(200);
+  expect(new Set(names).size).toBe(names.length);
+  expect(body.find((row) => row.categoria === "Ficção").quantidade_livros).toBe("5");
+});
+
+describe("operator registration", () => {
+  const original = process.env.OPERATOR_REGISTRATION_KEY;
+  afterEach(() => {
+    process.env.OPERATOR_REGISTRATION_KEY = original;
+  });
+
+  test("is disabled without a configured key", async () => {
+    delete process.env.OPERATOR_REGISTRATION_KEY;
+    const response = await post("/auth", { userLogin: "x", password: "y", secretKey: "" });
+    expect(response.status).toBe(403);
+  });
+
+  test("rejects a wrong key", async () => {
+    process.env.OPERATOR_REGISTRATION_KEY = "correct-key";
+    const response = await post("/auth", { userLogin: "x", password: "y", secretKey: "wrong" });
+    expect(response.status).toBe(403);
+  });
+});

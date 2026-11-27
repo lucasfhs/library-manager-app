@@ -152,11 +152,11 @@ class Report {
   static async getBooksByCategory() {
     const query = `
       SELECT
-        unnest(Categoria) AS Categoria,
+        c.Categoria,
         COUNT(*) AS Quantidade_Livros
-      FROM Livro
-      GROUP BY Categoria
-      ORDER BY Quantidade_Livros DESC;
+      FROM Livro, unnest(Livro.Categoria) AS c(Categoria)
+      GROUP BY c.Categoria
+      ORDER BY Quantidade_Livros DESC, c.Categoria;
     `;
 
     try {

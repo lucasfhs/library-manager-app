@@ -35,6 +35,7 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:-library_manager_password}
       DB_SSL: "false"
       SECRET_KEY: ${SECRET_KEY:-local-development-secret}
+      OPERATOR_REGISTRATION_KEY: ${OPERATOR_REGISTRATION_KEY:-Admin}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
     ports:
       - "${BACKEND_PORT:-3000}:3000"

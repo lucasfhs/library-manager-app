@@ -43,6 +43,17 @@ class ControllerApiUser {
     }
   }
   async post(req, res) {
+    // Operator accounts have full access, so sign-up requires a key that
+    // only the deployment knows. Without one, sign-up is disabled.
+    const registrationKey = process.env.OPERATOR_REGISTRATION_KEY;
+    if (!registrationKey) {
+      return res
+        .status(403)
+        .json({ message: "Operator registration is disabled." });
+    }
+    if (req.body.secretKey !== registrationKey) {
+      return res.status(403).json({ message: "Invalid registration key." });
+    }
     try {
       const { userLogin, password } = req.body;
       const result = await service.post(userLogin, password);
