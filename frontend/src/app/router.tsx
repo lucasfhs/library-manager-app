@@ -2,8 +2,6 @@ import type { ComponentType } from "react";
 import { createBrowserRouter, type RouteObject } from "react-router";
 import { RouteFallback } from "@/components/route-fallback";
 import { RequireRole } from "@/components/require-role";
-import { AdminLayout } from "@/layouts/admin-layout";
-import { ReaderLayout } from "@/layouts/reader-layout";
 import NotFoundPage from "@/pages/not-found";
 
 const page = (load: () => Promise<{ default: ComponentType }>) => async () => ({ Component: (await load()).default });
@@ -37,22 +35,32 @@ export const router = createBrowserRouter([
     children: [
       ...publicRoutes,
       {
-        element: (
-          <RequireRole role="reader">
-            <ReaderLayout />
-          </RequireRole>
-        ),
+        lazy: async () => {
+          const { ReaderLayout } = await import("@/layouts/reader-layout");
+          return {
+            Component: () => (
+              <RequireRole role="reader">
+                <ReaderLayout />
+              </RequireRole>
+            ),
+          };
+        },
         children: [
           { path: "user", lazy: page(() => import("@/pages/reader/catalog")) },
           { path: "loan", lazy: page(() => import("@/pages/reader/loans")) },
         ],
       },
       {
-        element: (
-          <RequireRole role="operator">
-            <AdminLayout />
-          </RequireRole>
-        ),
+        lazy: async () => {
+          const { AdminLayout } = await import("@/layouts/admin-layout");
+          return {
+            Component: () => (
+              <RequireRole role="operator">
+                <AdminLayout />
+              </RequireRole>
+            ),
+          };
+        },
         children: [
           { path: "admin", lazy: page(() => import("@/pages/admin/overview")) },
           { path: "admin/books", lazy: page(() => import("@/pages/admin/books")) },

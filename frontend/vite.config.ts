@@ -8,4 +8,17 @@ export default defineConfig({
   resolve: {
     alias: { "@": path.resolve(import.meta.dirname, "./src") },
   },
+  build: {
+    rolldownOptions: {
+      output: {
+        // Framework code changes rarely; keep it in its own long-cached chunk.
+        codeSplitting: {
+          groups: [
+            { name: "react", test: /node_modules[\\/](react|react-dom|scheduler|react-router)[\\/]/ },
+            { name: "query", test: /node_modules[\\/]@tanstack[\\/]/ },
+          ],
+        },
+      },
+    },
+  },
 });
