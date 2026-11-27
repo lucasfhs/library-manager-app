@@ -58,7 +58,19 @@ const env = {
   CORS_ORIGIN: base,
   PORT: String(apiPort),
   VITE_API_URL: api,
+  APP_URL: base,
 };
+// The payment scenes need a Stripe test-mode key, read from the environment or
+// backend/.env (the backend loads that file itself; nothing is copied from it).
+async function stripeKey() {
+  if (process.env.STRIPE_SECRET_KEY) return process.env.STRIPE_SECRET_KEY;
+  const file = await readFile(path.join(root, "backend/.env"), "utf8").catch(() => "");
+  return /^STRIPE_SECRET_KEY=(.+)$/m.exec(file)?.[1].trim() ?? "";
+}
+const paymentKey = await stripeKey();
+if (paymentKey && !paymentKey.startsWith("sk_test_")) {
+  throw new Error("Use a Stripe test-mode key (sk_test_...) for the preview capture.");
+}
 const children = [];
 const logs = [];
 function run(name, args, cwd, { wait = false } = {}) {
@@ -146,10 +158,12 @@ try {
     reducedMotion: "reduce",
   });
   const page = await context.newPage();
-  page.on("pageerror", (error) => errors.push(error.message));
+  // Only the app's own pages count; Stripe's hosted Checkout is not ours to judge.
+  const ours = () => page.url().startsWith(base);
+  page.on("pageerror", (error) => ours() && errors.push(error.message));
   page.on("console", (message) => {
     // 4xx answers are expected API outcomes; anything else is a defect.
-    if (message.type() === "error" && !/status of 4\d\d/.test(message.text())) errors.push(message.text());
+    if (ours() && message.type() === "error" && !/status of 4\d\d/.test(message.text())) errors.push(message.text());
   });
 
   const labels = {
@@ -161,9 +175,12 @@ try {
     loans: ["06 / CIRCULAÇÃO", "Devoluções em dois cliques.", "Filtro de atrasados e devolução que repõe o estoque."],
     catalog: ["07 / LEITORES", "Do catálogo à retirada.", "Busca, disponibilidade por biblioteca e pedido de empréstimo."],
     history: ["08 / HISTÓRICO", "Prazos sempre à vista.", "O empréstimo recém-criado aparece no histórico do leitor."],
+    fines: ["01 / MULTAS", "Atrasos viram multas claras.", "R$ 1,00 por dia de atraso, limitado ao preço do livro, calculado no PostgreSQL."],
+    checkout: ["02 / STRIPE", "Pagamento seguro com Stripe.", "Checkout hospedado pela Stripe em modo de teste, com o cartão 4242."],
+    paid: ["03 / CONFIRMAÇÃO", "Multas quitadas na hora.", "A API confirma a sessão na Stripe e grava o pagamento no banco."],
     closing: ["LIBRARY MANAGER", "Conheça o projeto por dentro.", "React 19 + shadcn/ui  /  Express 5  /  PostgreSQL 18"],
   };
-  async function shot(section, seconds, target, clicked = false) {
+  async function shot(section, seconds, target, clicked = false, note = undefined) {
     // A target is a locator or a box measured earlier (modals hide what is behind them).
     const box = !target ? null : "x" in target ? target : await target.boundingBox();
     const name = `${String(scenes.length).padStart(3, "0")}-${section}.png`;
@@ -175,7 +192,7 @@ try {
       route: new URL(page.url()).pathname,
       labels: labels[section],
       pointer: box ? { x: box.x + box.width / 2, y: box.y + box.height / 2, clicked } : null,
-      note: "Captura real da aplicação • API Express + PostgreSQL 18 • execução local",
+      note: note ?? "Captura real da aplicação • API Express + PostgreSQL 18 • execução local",
     });
   }
   async function goto(route) {
@@ -372,11 +389,70 @@ try {
   await shot("history", 2.6, page.getByText("Em andamento").last());
   check("New loan listed in the reader history");
 
+  if (paymentKey) await capturePayment();
+  else console.log("STRIPE_SECRET_KEY not set: skipping the payment scenes.");
+
   await page.evaluate(() => localStorage.clear());
   await goto("/");
   for (let i = 0; i < 8; i++) {
     await page.waitForTimeout(130);
     await shot("closing", 0.25);
+  }
+
+  // 09-11 Late fees paid through Stripe Checkout (test mode)
+  async function capturePayment() {
+    const stripeNote = "Captura real • Stripe Checkout em modo de teste • nenhuma cobrança real";
+    await page.evaluate(() => localStorage.clear());
+    await clearToasts();
+    await signIn("/loginUser", "23611482005", "pokemon", "/user");
+    await clearToasts();
+    await goto("/loan");
+    const panel = page.getByRole("region", { name: "Multas por atraso" });
+    await panel.getByText("Total em aberto").waitFor();
+    await settle();
+    await shot("fines", 2.4, panel.getByText("Total em aberto"));
+    const pay = panel.getByRole("button", { name: /^Pagar R\$/ });
+    check("Fines listed for the reader (4 late loans)", (await panel.getByRole("listitem").count()) === 4);
+    await pay.hover();
+    await shot("fines", 1, pay);
+    const checkoutResponse = page.waitForResponse((r) => r.url().endsWith("/payment/checkout"));
+    await pay.click();
+    check("Checkout Session created through POST /payment/checkout", (await checkoutResponse).ok());
+    await page.waitForURL(/checkout\.stripe\.com/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle").catch(() => {});
+
+    // Stripe may group payment methods in an accordion; open the card form if so.
+    const cardTab = page.locator('[data-testid="card-accordion-item-button"]');
+    if (await cardTab.isVisible().catch(() => false)) await cardTab.click();
+    const cardNumber = page.locator("#cardNumber");
+    await cardNumber.waitFor({ timeout: 30000 });
+    await page.waitForTimeout(800);
+    await shot("checkout", 2, null, false, stripeNote);
+    const email = page.locator("#email");
+    if ((await email.isVisible().catch(() => false)) && !(await email.inputValue())) {
+      await email.fill("leitor.teste@example.com");
+    }
+    await cardNumber.pressSequentially("4242424242424242", { delay: 25 });
+    await shot("checkout", 0.6, cardNumber, false, stripeNote);
+    await page.locator("#cardExpiry").pressSequentially("1234", { delay: 25 });
+    await page.locator("#cardCvc").pressSequentially("123", { delay: 25 });
+    const holder = page.locator("#billingName");
+    await holder.fill("Ana Julia");
+    const postal = page.locator("#billingPostalCode");
+    if (await postal.isVisible().catch(() => false)) await postal.fill("20000000");
+    await shot("checkout", 1.4, holder, false, stripeNote);
+    const submit = page.locator('[data-testid="hosted-payment-submit-button"]');
+    await submit.hover();
+    await shot("checkout", 0.8, submit, false, stripeNote);
+    await submit.click();
+    await page.waitForURL(`${base}/loan**`, { timeout: 60000 });
+    await page.evaluate(() => document.fonts.ready);
+    await toast("Pagamento confirmado").waitFor({ timeout: 20000 });
+    await panel.getByText("Todas as multas estão pagas").waitFor();
+    await settle();
+    await shot("paid", 1.6, toast("Pagamento confirmado"));
+    await shot("paid", 2.4, panel.getByText("Todas as multas estão pagas"));
+    check("Stripe payment confirmed and every fine marked paid");
   }
 
   await writeFile(path.join(output, "scenes.json"), JSON.stringify(scenes, null, 2));

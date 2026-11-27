@@ -45,7 +45,7 @@ export function FinesPanel({ cpfUser, fines, loading }: FinesPanelProps) {
   }
 
   return (
-    <Card aria-labelledby="fines-title" className="animate-fade-in gap-0 overflow-hidden p-0">
+    <Card role="region" aria-labelledby="fines-title" className="animate-fade-in gap-0 overflow-hidden p-0">
       <CardHeader className="gap-1 border-b px-5 py-4">
         <CardTitle id="fines-title" className="flex items-center gap-2 text-base">
           <ReceiptTextIcon className="size-4 text-brand-ink" aria-hidden="true" />

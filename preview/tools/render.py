@@ -16,7 +16,15 @@ WHITE = "#f1f7f4"
 MUTED = "#9baea6"
 SECTIONS = ["home", "login", "dashboard", "books", "stock", "loans", "catalog", "history"]
 NAMES = ["Início", "Acesso", "Painel", "Acervo", "Estoque", "Circulação", "Catálogo", "Histórico"]
-NAV_STEP = 1200 // len(SECTIONS)
+# The payment GIF has its own progress bar, so the tour keeps its eight steps.
+PAYMENT_SECTIONS = ["fines", "checkout", "paid"]
+PAYMENT_NAMES = ["Multas", "Checkout Stripe", "Confirmação"]
+
+
+def nav_for(section):
+    if section in PAYMENT_SECTIONS:
+        return PAYMENT_SECTIONS, PAYMENT_NAMES
+    return SECTIONS, NAMES
 
 
 def font(size, bold=False):
@@ -106,9 +114,11 @@ def compose(scene, series, progress, pointer=None, pulse=False):
     series_width = draw.textlength(series, font=FONTS["tiny"])
     draw.text((1238-series_width, 937), series, font=FONTS["tiny"], fill=MUTED)
     selected = "home" if scene["section"] == "closing" else scene["section"]
-    for i, (section, name) in enumerate(zip(SECTIONS, NAMES)):
-        x = 40 + i*NAV_STEP
-        width = NAV_STEP - 14
+    sections, names = nav_for(selected)
+    step = 1200 // len(sections)
+    for i, (section, name) in enumerate(zip(sections, names)):
+        x = 40 + i*step
+        width = step - 14
         active = section == selected
         draw.rounded_rectangle((x, 976, x+width, 979), radius=1, fill="#234234")
         if active:
@@ -208,7 +218,8 @@ def main():
     scenes = json.loads((CAPTURE / "scenes.json").read_text())
     result = []
     # The overview runs a little faster; the focused GIFs keep a slower pace.
-    overview = [dict(scene, seconds=scene["seconds"] * 0.85) for scene in scenes]
+    overview = [dict(scene, seconds=scene["seconds"] * 0.85) for scene in scenes
+                if scene["section"] not in PAYMENT_SECTIONS]
     result.append(render("library-manager-demo.gif", overview, "VISÃO GERAL"))
     catalog = [dict(scene) for scene in scenes if scene["section"] in {"catalog", "history"}]
     for scene in catalog:
@@ -219,9 +230,14 @@ def main():
     for scene in admin:
         scene["seconds"] *= 1.15
     result.append(render("library-manager-admin.gif", admin, "OPERAÇÃO DO ACERVO"))
+    payment = [dict(scene) for scene in scenes if scene["section"] in PAYMENT_SECTIONS]
+    if payment:
+        result.append(render("library-manager-pagamento.gif", payment, "MULTAS & STRIPE"))
     # Contact sheet for visual review. Intermediate files are intentionally not committed.
-    review = Image.new("RGB", (1280, 2000), "#07130e")
-    for i, section in enumerate(SECTIONS):
+    reviewed = [section for section in SECTIONS + PAYMENT_SECTIONS
+                if any(s["section"] == section for s in scenes)]
+    review = Image.new("RGB", (1280, 500 * ((len(reviewed) + 1) // 2)), "#07130e")
+    for i, section in enumerate(reviewed):
         scene = [s for s in scenes if s["section"] == section][-1]
         frame = compose(scene, "REVISÃO", 1, scene["pointer"])
         review.paste(frame.resize((640, 500)), ((i % 2)*640, (i//2)*500))
