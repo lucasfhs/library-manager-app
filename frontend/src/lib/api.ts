@@ -32,6 +32,13 @@ const knownMessages: [RegExp, string][] = [
   [/permission/i, "Seu perfil não tem permissão para esta ação."],
   [/registration key/i, "Chave de cadastro inválida."],
   [/registration is disabled/i, "O cadastro de operadores está desativado neste ambiente."],
+  [
+    /Payments are not configured|APP_URL is not configured/i,
+    "Os pagamentos online não estão configurados neste ambiente.",
+  ],
+  [/no fines to pay/i, "Você não tem multas pendentes."],
+  [/paid amount does not match/i, "O valor pago não confere com as multas. Procure a biblioteca para conferir."],
+  [/Payment not found/i, "Pagamento não encontrado."],
 ];
 
 export function describeError(error: unknown, fallback = "Não foi possível concluir a operação.") {

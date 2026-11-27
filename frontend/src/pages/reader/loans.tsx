@@ -1,6 +1,7 @@
-import { useMemo } from "react";
-import { BookCheckIcon, BookOpenIcon, ClockAlertIcon } from "lucide-react";
+import { useEffect, useMemo, useRef } from "react";
+import { BookCheckIcon, BookOpenIcon, ClockAlertIcon, ReceiptTextIcon } from "lucide-react";
 import { Link, useSearchParams } from "react-router";
+import { toast } from "sonner";
 import { BookCover } from "@/components/book-cover";
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
@@ -12,9 +13,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LOAN_PERIOD_DAYS, MAX_OPEN_LOANS, loanStatus, type LoanStatus } from "@/lib/domain";
-import { formatDate, parseDate } from "@/lib/format";
-import { useCatalog, useReaderLoans } from "@/lib/queries";
+import { describeError } from "@/lib/api";
+import { formatCurrency, formatDate, parseDate } from "@/lib/format";
+import { useCatalog, useConfirmFinePayment, useFines, useReaderLoans } from "@/lib/queries";
 import { useSession } from "@/lib/session";
+import { FinesPanel } from "./fines-panel";
 
 type Filter = "all" | "open" | "returned";
 
@@ -25,12 +28,49 @@ function dueDate(loanDate: string) {
   return formatDate(date.toISOString().slice(0, 10));
 }
 
+/** Handles the redirect back from Stripe Checkout (?payment=success|cancelled). */
+function usePaymentReturn(params: URLSearchParams, setParams: ReturnType<typeof useSearchParams>[1]) {
+  const confirm = useConfirmFinePayment();
+  const handled = useRef<string | null>(null);
+  const outcome = params.get("payment");
+  const sessionId = params.get("session_id");
+
+  useEffect(() => {
+    if (!outcome || handled.current === (sessionId ?? outcome)) return;
+    handled.current = sessionId ?? outcome;
+    setParams({}, { replace: true });
+
+    if (outcome === "cancelled") {
+      toast.info("Pagamento cancelado", {
+        description: "Nenhuma cobrança foi feita. Suas multas continuam em aberto.",
+      });
+      return;
+    }
+    if (outcome === "success" && sessionId) {
+      confirm.mutate(sessionId, {
+        onSuccess: (result) =>
+          result.status === "paid"
+            ? toast.success("Pagamento confirmado", {
+                description: `${formatCurrency(result.amountCents / 100)} pagos. Suas multas foram quitadas.`,
+              })
+            : toast.info("Pagamento em processamento", {
+                description: "Assim que a Stripe confirmar, as multas aparecerão como pagas.",
+              }),
+        onError: (error) =>
+          toast.error("Não foi possível confirmar o pagamento", { description: describeError(error) }),
+      });
+    }
+  }, [outcome, sessionId, setParams, confirm]);
+}
+
 export default function ReaderLoansPage() {
   const { session } = useSession();
   const loans = useReaderLoans(session?.subject);
   const catalog = useCatalog();
+  const fines = useFines(session?.subject);
   const [params, setParams] = useSearchParams();
   const filter = (params.get("status") as Filter) ?? "all";
+  usePaymentReturn(params, setParams);
 
   const rows = useMemo(() => {
     const bookIds = new Map((catalog.data ?? []).map((book) => [book.titulo, book]));
@@ -65,7 +105,7 @@ export default function ReaderLoansPage() {
         }
       />
 
-      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard
           label="Em andamento"
           value={counts.active}
@@ -81,7 +121,16 @@ export default function ReaderLoansPage() {
           loading={loans.isPending}
         />
         <StatCard label="Devolvidos" value={counts.returned} icon={<BookCheckIcon />} loading={loans.isPending} />
+        <StatCard
+          label="Multas em aberto"
+          value={formatCurrency((fines.data?.totalDueCents ?? 0) / 100)}
+          hint={fines.data?.totalDueCents ? "Pague online com cartão" : "Nenhuma pendência"}
+          icon={<ReceiptTextIcon />}
+          loading={fines.isPending}
+        />
       </div>
+
+      {session && <FinesPanel cpfUser={session.subject} fines={fines.data} loading={fines.isPending} />}
 
       <Tabs
         value={filter}

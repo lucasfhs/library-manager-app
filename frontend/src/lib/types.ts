@@ -117,3 +117,34 @@ export type LoanInput = {
 };
 
 export type MutationResult<T> = { message: string; result: T };
+
+/** A loan that has accrued a late fee; amounts are in cents (GET /payment/fines/:cpf). */
+export type FineLoan = {
+  loanId: number;
+  book: string;
+  library: string;
+  loanDate: string;
+  dueDate: string;
+  returnDate: string | null;
+  daysLate: number;
+  fineCents: number;
+  paidCents: number;
+  dueCents: number;
+};
+
+export type FineSummary = {
+  cpfUser: string;
+  finePerDayCents: number;
+  totalFineCents: number;
+  totalPaidCents: number;
+  totalDueCents: number;
+  loans: FineLoan[];
+};
+
+export type CheckoutSession = { sessionId: string; url: string; amountCents: number };
+
+export type PaymentConfirmation = {
+  sessionId: string;
+  status: "paid" | "pending" | "expired";
+  amountCents: number;
+};

@@ -5,7 +5,9 @@ import type {
   BookAvailability,
   BookInput,
   CatalogBook,
+  CheckoutSession,
   CategoryCount,
+  FineSummary,
   Library,
   LibraryHolding,
   LibraryInput,
@@ -14,6 +16,7 @@ import type {
   LoanInput,
   MatureCustomerLoan,
   MutationResult,
+  PaymentConfirmation,
   Reader,
   ReaderInput,
   ReaderLoan,
@@ -32,6 +35,7 @@ export const keys = {
   readerLoans: (cpf: string) => ["reader-loans", cpf] as const,
   availability: (bookId: number) => ["availability", bookId] as const,
   report: (name: string) => ["report", name] as const,
+  fines: (cpf: string) => ["fines", cpf] as const,
 };
 
 // Lists ---------------------------------------------------------------------
@@ -70,6 +74,13 @@ export const useAvailability = (bookId: number | undefined) =>
     enabled: Boolean(bookId),
   });
 
+export const useFines = (cpf: string | undefined) =>
+  useQuery({
+    queryKey: keys.fines(cpf ?? ""),
+    queryFn: () => request<FineSummary>(`/payment/fines/${cpf}`),
+    enabled: Boolean(cpf),
+  });
+
 // Reports -------------------------------------------------------------------
 
 const report = <T>(name: string) => ({
@@ -92,7 +103,7 @@ function useInvalidate() {
 }
 
 /** Stock and loans feed every catalog and report view. */
-const inventoryKeys = [keys.catalog, keys.stock, keys.loans, ["availability"], ["report"], ["reader-loans"]];
+const inventoryKeys = [keys.catalog, keys.stock, keys.loans, ["availability"], ["report"], ["reader-loans"], ["fines"]];
 
 export function useSaveBook() {
   const invalidate = useInvalidate();
@@ -166,6 +177,24 @@ export function useReturnLoan() {
         } satisfies LoanInput,
       }),
     onSuccess: () => invalidate(...inventoryKeys),
+  });
+}
+
+/** Opens a Stripe Checkout Session for every unpaid fine of the reader. */
+export function useStartFinePayment() {
+  return useMutation({
+    mutationFn: (cpfUser: string) =>
+      request<MutationResult<CheckoutSession>>("/payment/checkout", { method: "POST", body: { cpfUser } }),
+  });
+}
+
+/** Reconciles a finished Checkout Session; the webhook does the same on the server. */
+export function useConfirmFinePayment() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: (sessionId: string) =>
+      request<PaymentConfirmation>(`/payment/confirm/${encodeURIComponent(sessionId)}`, { method: "POST" }),
+    onSuccess: () => invalidate(["fines"]),
   });
 }
 
