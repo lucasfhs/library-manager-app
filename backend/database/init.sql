@@ -465,8 +465,8 @@ COPY public.livro (id, titulo, autor, categoria, paginas, preco, idioma) FROM st
 9	O Código Da Vinci	Dan Brown	{Suspense,Ficção}	480	9.90	Português
 10	A Revolução dos Bichos	George Orwell	{Ficção,História}	152	10.90	Português
 1	O Morro dos Ventos Uivantes	Emily Brontë	{Romance}	416	42.90	Português
-19	Eu quero danone	MarieleFranco	{Não-ficção}	2	6.00	Português
-20	Conjunto de instrucoes	Gabriel	{Romance}	21	6.00	Inglês
+19	Memórias Póstumas de Brás Cubas	Machado de Assis	{Romance,Ficção}	368	34.90	Português
+20	Cem Anos de Solidão	Gabriel García Márquez	{Romance,Fantasia}	448	49.90	Português
 \.
 
 
@@ -511,8 +511,8 @@ COPY public.usuario (cpf, nome, email, telefone, data_nascimento, endereco, senh
 90202975037	Mariana Oliveira	mariana.oliveira@yahoo.com	21977778888	1995-01-25	("Rua dos Pinheiros, 45",Pinheiros,"São Paulo",SP,Brasil,05422-000)	12345
 23854652054	Carlos Almeida	carlos.almeida@empresa.com	11966665555	1978-11-05	("Rua XV de Novembro, 300",Centro,Curitiba,PR,Brasil,80020-310)	123456
 87359218039	Fernanda Souza	fernanda.souza@gmail.com	21944443333	1992-07-20	("Rua Bahia, 100",Savassi,"Belo Horizonte",MG,Brasil,30140-001)	1234567
-66723854012	JosefinoMedelei	MarieleFranco@lula.com	9222543599 	1999-02-11	(Marta,"Mora Longe","Belo Horizonte","Minas Gerais",Brasil,6192)	odeiocolica
-14085335022	Mario Bros	nintendo@nintendo.com.br	3133888396 	1987-02-02	(Cogumelo,"Koopa Place",Mushroom,Mushroom,"Mushroom Kingdom",64)	luigi
+66723854012	Beatriz Ramos	beatriz.ramos@example.com	31987650012	1999-02-11	("Rua da Bahia, 1148",Centro,"Belo Horizonte",MG,Brasil,30160-011)	leitura
+14085335022	Rafael Costa	rafael.costa@example.com	31933880396	1987-02-02	("Av. Afonso Pena, 1212",Centro,"Belo Horizonte",MG,Brasil,30130-003)	rafael123
 23611482005	Ana Júlia	ana.clara@gmail.com	21988887777	1990-03-15	("Rua das Flores",123,Centro,"Rio de Janeiro",RJ,Brasil)	pokemon
 65347668091	Guina	gmail@gmail.com	3133888392 	2025-02-06	(Rua,Bairro,Cidade,Estado,Pais,253)	pokemon
 30458260088	Caio Lopes	caiolopesmalta@yahoo.com	3133888396 	2025-02-10	(Rua,Bairro,Cidade,Estado,Pais,Numero)	lopes
