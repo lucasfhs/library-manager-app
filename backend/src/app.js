@@ -21,6 +21,12 @@ const allowedOrigins = process.env.CORS_ORIGIN
 app.disable("x-powered-by");
 app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
+// Express 5 leaves req.body undefined when no body was parsed; controllers
+// destructure it, so keep the Express 4 behaviour of an empty object.
+app.use((req, _res, next) => {
+  req.body ??= {};
+  next();
+});
 
 app.get("/health", async (_req, res) => {
   try {
