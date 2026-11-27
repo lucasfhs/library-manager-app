@@ -32,6 +32,7 @@ O domínio da aplicação abrange leitores, operadores, livros, bibliotecas, est
 - Ficha do livro com a disponibilidade em cada biblioteca e pedido de empréstimo com um clique.
 - Histórico de empréstimos com prazos, situação (em andamento, atrasado, devolvido) e limite de uso.
 - Cadastro com validação de CPF, telefone, CEP e endereço.
+- Multas por atraso (R$ 1,00 por dia após o prazo, limitadas ao preço do livro) pagas online com cartão pelo Stripe Checkout.
 
 **Operadores**
 
@@ -75,7 +76,7 @@ O processo de gravação e as instruções para recriar os GIFs estão em [`prev
 | Camada | Tecnologias |
 | --- | --- |
 | Frontend | React 19, TypeScript 6, Vite 8, React Router 8, Tailwind CSS 4, shadcn/ui (Radix UI), TanStack Query 5, React Hook Form + Zod, Sonner, Lucide |
-| Backend | Node.js 24, Express 5, JWT, cliente `pg` |
+| Backend | Node.js 24, Express 5, JWT, cliente `pg`, Stripe (Checkout e webhooks) |
 | Banco de dados | PostgreSQL 18 |
 | Infraestrutura local | Docker, Docker Compose e Nginx 1.30 |
 | Qualidade | Jest 30 (unitários e integração), ESLint 10, Prettier, verificação de tipos e GitHub Actions |
@@ -153,6 +154,7 @@ cp .env.example .env
 | `SECRET_KEY` | `local-development-secret` | Segredo de assinatura dos tokens JWT |
 | `OPERATOR_REGISTRATION_KEY` | `Admin` | Chave exigida pela API para cadastrar operadores; sem ela, o cadastro fica desativado |
 | `CORS_ORIGIN` | `http://localhost:8080` | Origem permitida para o navegador |
+| `APP_URL` | `http://localhost:8080` | Endereço do frontend para onde o Stripe Checkout devolve o leitor |
 
 O banco inicial contém registros de demonstração. **Não reutilize estas credenciais fora de uma demonstração local:**
 
@@ -160,6 +162,18 @@ O banco inicial contém registros de demonstração. **Não reutilize estas cred
 | --- | --- | --- |
 | Operador | usuário `admin` | `admin` |
 | Leitor | CPF `321.687.810-44` (João Pedro) | `1234` |
+| Leitora com multas | CPF `236.114.820-05` (Ana Júlia, R$ 190,70 em aberto) | `pokemon` |
+
+#### Pagamentos com Stripe (opcional)
+
+As multas por atraso são pagas pelo [Stripe Checkout](https://docs.stripe.com/payments/checkout). Sem chave configurada, o restante do sistema funciona normalmente e o botão de pagamento informa que os pagamentos não estão configurados.
+
+1. Em uma conta Stripe, copie a chave secreta de **teste** (`sk_test_…`) em *Developers → API keys*.
+2. Crie `backend/.env` a partir de `backend/.env.example` e preencha `STRIPE_SECRET_KEY`. O Docker Compose lê esse arquivo automaticamente; nunca o adicione ao Git.
+3. Opcional: para receber webhooks localmente, execute `stripe listen --forward-to localhost:3000/payment/webhook` com a [Stripe CLI](https://docs.stripe.com/stripe-cli) e copie o `whsec_…` exibido para `STRIPE_WEBHOOK_SECRET`. Em produção, cadastre `https://<seu-domínio>/api/payment/webhook` com os eventos `checkout.session.completed`, `checkout.session.async_payment_succeeded` e `checkout.session.expired`.
+4. Entre como Ana Júlia, abra **Meus empréstimos** e pague com o cartão de teste `4242 4242 4242 4242`, qualquer validade futura e qualquer CVC.
+
+Mesmo sem webhook, o pagamento é confirmado quando o leitor volta do Checkout: a API consulta a sessão na Stripe e confere o valor antes de registrá-lo. Bancos criados antes desta versão precisam ser recriados com `docker compose down --volumes` para receber a tabela `pagamento_multa`.
 
 ### Desenvolvimento local
 
@@ -223,8 +237,9 @@ Os endpoints públicos incluem `/health`, cadastro e login em `/auth` e cadastro
 | `/loan` | Empréstimos e devoluções |
 | `/user` | Registros de leitores |
 | `/report/*` | Relatórios de catálogo, disponibilidade, empréstimos e bibliotecas |
+| `/payment/*` | Multas do leitor (`GET /payment/fines/:cpf`), abertura do Stripe Checkout (`POST /payment/checkout`), confirmação (`POST /payment/confirm/:sessionId`) e webhook público da Stripe (`POST /payment/webhook`, validado pela assinatura) |
 
-**Perfis:** tokens de operador acessam todos os recursos. Tokens de leitor podem consultar o catálogo, os livros, as bibliotecas e o estoque, ler o próprio cadastro e histórico e criar empréstimos apenas no próprio CPF; o restante responde `403`.
+**Perfis:** tokens de operador acessam todos os recursos. Tokens de leitor podem consultar o catálogo, os livros, as bibliotecas e o estoque, ler o próprio cadastro, histórico e multas, criar empréstimos e pagar multas apenas no próprio CPF; o restante responde `403`.
 
 **Respostas de erro:** credenciais inválidas respondem `401`; conflitos de chave única ou estrangeira, `409`; violações de regras do banco (gatilhos e restrições), `422` com a mensagem da regra; dados ausentes ou inválidos, `400`; registros inexistentes, `404`.
 
@@ -268,6 +283,7 @@ The application manages readers, operators, books, libraries, inventory, loans, 
 - A book sheet showing availability in each library and one-click loan requests.
 - Loan history with due dates, status (active, overdue, returned), and the open-loan limit.
 - Sign-up with CPF, phone, postal code, and address validation.
+- Late fees (R$ 1.00 per day past the due date, capped at the book's price) paid online by card through Stripe Checkout.
 
 **Operators**
 
@@ -321,7 +337,7 @@ See [`preview/README.md`](./preview/README.md) for the recording process and ins
 | Layer | Technologies |
 | --- | --- |
 | Frontend | React 19, TypeScript 6, Vite 8, React Router 8, Tailwind CSS 4, shadcn/ui (Radix UI), TanStack Query 5, React Hook Form + Zod, Sonner, Lucide |
-| Backend | Node.js 24, Express 5, JWT, and the `pg` client |
+| Backend | Node.js 24, Express 5, JWT, the `pg` client, and Stripe (Checkout and webhooks) |
 | Database | PostgreSQL 18 |
 | Local infrastructure | Docker, Docker Compose, and Nginx 1.30 |
 | Quality | Jest 30 (unit and integration), ESLint 10, Prettier, type checking, and GitHub Actions |
@@ -400,6 +416,7 @@ cp .env.example .env
 | `SECRET_KEY` | `local-development-secret` | JWT signing secret |
 | `OPERATOR_REGISTRATION_KEY` | `Admin` | Key the API requires to register operators; without it, operator sign-up is disabled |
 | `CORS_ORIGIN` | `http://localhost:8080` | Allowed browser origin |
+| `APP_URL` | `http://localhost:8080` | Frontend address Stripe Checkout sends the reader back to |
 
 The seeded database includes demonstration records. Never reuse these credentials outside a local demonstration:
 
@@ -407,6 +424,18 @@ The seeded database includes demonstration records. Never reuse these credential
 | --- | --- | --- |
 | Operator | user `admin` | `admin` |
 | Reader | CPF `321.687.810-44` (João Pedro) | `1234` |
+| Reader with fines | CPF `236.114.820-05` (Ana Júlia, R$ 190.70 due) | `pokemon` |
+
+#### Stripe payments (optional)
+
+Late fees are paid through [Stripe Checkout](https://docs.stripe.com/payments/checkout). Without a key, everything else works and the pay button reports that payments are not configured.
+
+1. In a Stripe account, copy the **test-mode** secret key (`sk_test_…`) from *Developers → API keys*.
+2. Create `backend/.env` from `backend/.env.example` and set `STRIPE_SECRET_KEY`. Docker Compose reads that file automatically; never commit it.
+3. Optional: to receive webhooks locally, run `stripe listen --forward-to localhost:3000/payment/webhook` with the [Stripe CLI](https://docs.stripe.com/stripe-cli) and copy the printed `whsec_…` into `STRIPE_WEBHOOK_SECRET`. In production, register `https://<your-domain>/api/payment/webhook` for the `checkout.session.completed`, `checkout.session.async_payment_succeeded`, and `checkout.session.expired` events.
+4. Sign in as Ana Júlia, open **Meus empréstimos**, and pay with the test card `4242 4242 4242 4242`, any future expiry date, and any CVC.
+
+Even without a webhook, the payment is confirmed when the reader returns from Checkout: the API retrieves the session from Stripe and checks the amount before recording it. Databases created before this version must be recreated with `docker compose down --volumes` to get the `pagamento_multa` table.
 
 ### Local development
 
@@ -468,8 +497,9 @@ Public endpoints include `/health`, sign-up and login under `/auth`, and reader 
 - `/loan` — loans and returns
 - `/user` — reader records
 - `/report/*` — catalog, availability, loan, and library reports
+- `/payment/*` — a reader's fines (`GET /payment/fines/:cpf`), opening Stripe Checkout (`POST /payment/checkout`), confirmation (`POST /payment/confirm/:sessionId`), and the public Stripe webhook (`POST /payment/webhook`, verified by its signature)
 
-**Roles:** operator tokens can reach every resource. Reader tokens can browse the catalog, books, libraries, and stock, read their own profile and loan history, and create loans only for their own CPF; everything else answers `403`.
+**Roles:** operator tokens can reach every resource. Reader tokens can browse the catalog, books, libraries, and stock, read their own profile, loan history, and fines, and create loans or pay fines only for their own CPF; everything else answers `403`.
 
 **Error responses:** invalid credentials answer `401`; unique or foreign-key conflicts, `409`; database rule violations (triggers and constraints), `422` with the rule's message; missing or invalid input, `400`; missing records, `404`.
 
