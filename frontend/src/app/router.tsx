@@ -2,9 +2,9 @@ import type { ComponentType } from "react";
 import { createBrowserRouter, type RouteObject } from "react-router";
 import { RouteFallback } from "@/components/route-fallback";
 import { RequireRole } from "@/components/require-role";
+import { AdminLayout } from "@/layouts/admin-layout";
 import { ReaderLayout } from "@/layouts/reader-layout";
 import NotFoundPage from "@/pages/not-found";
-import AdminMainPage from "@/pages/AdminMainPage.jsx";
 import BibliotecaPage from "@/components/BibliotecaPage.jsx";
 
 const page = (load: () => Promise<{ default: ComponentType }>) => async () => ({ Component: (await load()).default });
@@ -48,8 +48,18 @@ export const router = createBrowserRouter([
           { path: "loan", lazy: page(() => import("@/pages/reader/loans")) },
         ],
       },
-      { path: "admin", element: <AdminMainPage /> },
-      { path: "library", element: <BibliotecaPage /> },
+      {
+        element: (
+          <RequireRole role="operator">
+            <AdminLayout />
+          </RequireRole>
+        ),
+        children: [
+          { path: "admin", lazy: page(() => import("@/pages/admin/overview")) },
+          { path: "admin/books", lazy: page(() => import("@/pages/admin/books")) },
+          { path: "library", element: <BibliotecaPage /> },
+        ],
+      },
       { path: "*", element: <NotFoundPage /> },
     ],
   },
