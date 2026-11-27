@@ -2,8 +2,6 @@
 
 ### Demonstração visual
 
-Conheça a interface sem instalar nada: **um tour de 34 segundos** com capturas reais da aplicação executada localmente, legendas em português e destaque das interações. Todas as operações mostradas são gravadas no PostgreSQL pela API.
-
 <p align="center">
   <img src="./preview/library-manager-demo.gif" alt="Tour animado do Library Manager: página inicial, login de operador, painel, edição de livro, ajuste de estoque, devolução de empréstimo, catálogo do leitor com pedido de empréstimo e histórico" width="960">
   <br>
