@@ -1,4 +1,4 @@
-import BrandLogo from "./BrandLogo";
+import { BrandLogo } from "@/components/brand-logo";
 
 function Header() {
   return (

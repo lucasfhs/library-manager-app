@@ -1,6 +1,6 @@
 import { User, LogOut, Menu } from "lucide-react";
 import { useState } from "react";
-import BrandLogo from "./BrandLogo";
+import { BrandLogo } from "@/components/brand-logo";
 
 function NavBarAdmin() {
   const [menuAberto, setMenuAberto] = useState(false);

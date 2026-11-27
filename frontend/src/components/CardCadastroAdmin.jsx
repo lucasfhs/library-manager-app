@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { apiUrl } from "../config/api";
+import { apiUrl } from "@/lib/api";
 const SECRETKEY = "Admin";
 function CardCadastroAdmin() {
   const [formData, setFormData] = useState({

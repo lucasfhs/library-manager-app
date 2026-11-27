@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
-import { apiUrl } from "../config/api";
+import { apiUrl } from "@/lib/api";
 
 function CardLoginAdmin() {
   const [userLogin, setUserLogin] = useState("");

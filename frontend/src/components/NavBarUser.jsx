@@ -1,5 +1,5 @@
 import { User, LogOut } from "lucide-react";
-import BrandLogo from "./BrandLogo";
+import { BrandLogo } from "@/components/brand-logo";
 
 function NavBarUser() {
   return (
