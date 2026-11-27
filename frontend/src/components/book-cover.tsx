@@ -25,7 +25,7 @@ type BookCoverProps = {
 const sizes = {
   xs: { root: "w-9 rounded-[3px] p-1", title: "text-[5px] leading-[1.15]", meta: "hidden", rule: "hidden" },
   sm: { root: "w-14 rounded-[4px] p-1.5", title: "text-[7px] leading-tight", meta: "hidden", rule: "w-3 mb-1" },
-  md: { root: "w-full rounded-md p-4", title: "text-lg leading-tight", meta: "text-[10px]", rule: "w-8 mb-3" },
+  md: { root: "w-full rounded-md p-3.5", title: "text-[0.95rem] leading-tight", meta: "text-[9px]", rule: "w-7 mb-2.5" },
   lg: { root: "w-full rounded-md p-6", title: "text-2xl leading-tight", meta: "text-xs", rule: "w-10 mb-4" },
 };
 

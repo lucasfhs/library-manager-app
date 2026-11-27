@@ -1,11 +1,11 @@
 import { MoonIcon, SunIcon } from "lucide-react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function ThemeToggle({ className }: { className?: string }) {
-  const { resolvedTheme, setTheme } = useTheme();
-  const dark = resolvedTheme === "dark";
+  const { theme, setTheme } = useTheme();
+  const dark = theme === "dark";
   const label = dark ? "Usar tema claro" : "Usar tema escuro";
   return (
     <Tooltip>
