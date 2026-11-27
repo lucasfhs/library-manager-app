@@ -26,7 +26,11 @@ const sorters: Record<string, { label: string; compare: (a: CatalogBook, b: Cata
   },
 };
 
-const normalize = (value: string) => value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+const normalize = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
 
 export default function CatalogPage() {
   const { session } = useSession();
@@ -188,11 +192,7 @@ export default function CatalogPage() {
           )}
           <ul className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {books.map((book, index) => (
-              <li
-                key={book.id}
-                className="animate-fade-up"
-                style={{ animationDelay: `${Math.min(index, 12) * 35}ms` }}
-              >
+              <li key={book.id} className="animate-fade-up" style={{ animationDelay: `${Math.min(index, 12) * 35}ms` }}>
                 <button
                   type="button"
                   onClick={() => setSelectedId(book.id)}

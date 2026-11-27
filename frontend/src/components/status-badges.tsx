@@ -12,7 +12,7 @@ const tones = {
 export function AvailabilityBadge({ quantity, className }: { quantity: number; className?: string }) {
   const tone = availabilityTone(quantity);
   return (
-    <Badge variant="outline" className={cn("gap-1.5 border-0 ring-1 ring-inset tabular", tones[tone], className)}>
+    <Badge variant="outline" className={cn("gap-1.5 border-0 tabular ring-1 ring-inset", tones[tone], className)}>
       <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
       {quantity > 0 ? plural(quantity, "disponível", "disponíveis") : "Indisponível"}
     </Badge>

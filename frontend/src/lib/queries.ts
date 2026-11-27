@@ -41,11 +41,9 @@ export const useCatalog = () =>
 
 export const useBooks = () => useQuery({ queryKey: keys.books, queryFn: () => request<Book[]>("/book") });
 
-export const useLibraries = () =>
-  useQuery({ queryKey: keys.libraries, queryFn: () => request<Library[]>("/library") });
+export const useLibraries = () => useQuery({ queryKey: keys.libraries, queryFn: () => request<Library[]>("/library") });
 
-export const useStock = () =>
-  useQuery({ queryKey: keys.stock, queryFn: () => request<StockEntry[]>("/bookLibrary") });
+export const useStock = () => useQuery({ queryKey: keys.stock, queryFn: () => request<StockEntry[]>("/bookLibrary") });
 
 export const useLoans = () => useQuery({ queryKey: keys.loans, queryFn: () => request<Loan[]>("/loan") });
 

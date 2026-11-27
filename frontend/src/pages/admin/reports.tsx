@@ -75,10 +75,7 @@ function ReportTable<T>({
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
               {columns.map((column) => (
-                <TableHead
-                  key={column.header}
-                  className={`first:pl-5 last:pr-5 ${column.numeric ? "text-right" : ""}`}
-                >
+                <TableHead key={column.header} className={`first:pl-5 last:pr-5 ${column.numeric ? "text-right" : ""}`}>
                   {column.header}
                 </TableHead>
               ))}
@@ -153,7 +150,10 @@ export default function ReportsPage() {
         title="Relatórios"
         description="Consultas prontas sobre o acervo, o estoque e os leitores. Exporte qualquer tabela em CSV."
       />
-      <Tabs value={tab} onValueChange={(value) => setParams(value === "catalogo" ? {} : { relatorio: value }, { replace: true })}>
+      <Tabs
+        value={tab}
+        onValueChange={(value) => setParams(value === "catalogo" ? {} : { relatorio: value }, { replace: true })}
+      >
         <div className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
           <TabsList>
             {reports.map((report) => (
@@ -191,8 +191,17 @@ export default function ReportsPage() {
             filename="titulos-por-categoria.csv"
             rowKey={(row) => row.categoria}
             columns={[
-              { header: "Categoria", cell: (row) => <span className="font-medium">{row.categoria}</span>, csv: (row) => row.categoria },
-              { header: "Títulos", numeric: true, cell: (row) => formatNumber(row.quantidade_livros), csv: (row) => row.quantidade_livros },
+              {
+                header: "Categoria",
+                cell: (row) => <span className="font-medium">{row.categoria}</span>,
+                csv: (row) => row.categoria,
+              },
+              {
+                header: "Títulos",
+                numeric: true,
+                cell: (row) => formatNumber(row.quantidade_livros),
+                csv: (row) => row.quantidade_livros,
+              },
             ]}
           />
         </TabsContent>
@@ -204,9 +213,22 @@ export default function ReportsPage() {
             filename="acervo-por-biblioteca.csv"
             rowKey={(row, index) => `${row.biblioteca}-${row.livro}-${index}`}
             columns={[
-              { header: "Biblioteca", cell: (row) => <span className="font-medium">{row.biblioteca}</span>, csv: (row) => row.biblioteca },
-              { header: "Livro", cell: (row) => row.livro ?? <span className="text-muted-foreground">Sem livros vinculados</span>, csv: (row) => row.livro ?? "" },
-              { header: "Exemplares", numeric: true, cell: (row) => formatNumber(row.quantidade), csv: (row) => row.quantidade },
+              {
+                header: "Biblioteca",
+                cell: (row) => <span className="font-medium">{row.biblioteca}</span>,
+                csv: (row) => row.biblioteca,
+              },
+              {
+                header: "Livro",
+                cell: (row) => row.livro ?? <span className="text-muted-foreground">Sem livros vinculados</span>,
+                csv: (row) => row.livro ?? "",
+              },
+              {
+                header: "Exemplares",
+                numeric: true,
+                cell: (row) => formatNumber(row.quantidade),
+                csv: (row) => row.quantidade,
+              },
             ]}
           />
         </TabsContent>
@@ -218,7 +240,11 @@ export default function ReportsPage() {
             filename="emprestimos-leitores-25-anos.csv"
             rowKey={(row) => row.emprestimo_id}
             columns={[
-              { header: "Leitor", cell: (row) => <span className="font-medium">{row.usuario}</span>, csv: (row) => row.usuario },
+              {
+                header: "Leitor",
+                cell: (row) => <span className="font-medium">{row.usuario}</span>,
+                csv: (row) => row.usuario,
+              },
               { header: "Livro", cell: (row) => row.livro, csv: (row) => row.livro },
               { header: "Biblioteca", cell: (row) => row.biblioteca, csv: (row) => row.biblioteca },
               { header: "Retirada", numeric: true, cell: (row) => row.emprestimo, csv: (row) => row.emprestimo },

@@ -7,7 +7,14 @@ import { Combobox } from "@/components/combobox";
 import { FormAlert } from "@/components/form-alert";
 import { TextField } from "@/components/form-fields";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
@@ -134,7 +141,13 @@ export function LoanFormDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                   <FieldLabel htmlFor="loan-library">Biblioteca</FieldLabel>
                   <Select value={field.value} onValueChange={field.onChange} disabled={!book || holdings.length === 0}>
                     <SelectTrigger id="loan-library" className="w-full" aria-invalid={fieldState.invalid || undefined}>
-                      <SelectValue placeholder={book && holdings.length === 0 ? "Nenhuma unidade possui este livro" : "Selecione uma biblioteca"} />
+                      <SelectValue
+                        placeholder={
+                          book && holdings.length === 0
+                            ? "Nenhuma unidade possui este livro"
+                            : "Selecione uma biblioteca"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {holdings.map((entry) => (

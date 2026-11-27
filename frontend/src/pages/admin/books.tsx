@@ -27,7 +27,11 @@ import { useCatalog, useDeleteBook } from "@/lib/queries";
 import type { CatalogBook } from "@/lib/types";
 import { BookFormDialog } from "./book-form-dialog";
 
-const normalize = (value: string) => value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+const normalize = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
 
 export default function BooksPage() {
   const catalog = useCatalog();
@@ -63,7 +67,11 @@ export default function BooksPage() {
       <PageHeader
         eyebrow="Acervo"
         title="Livros"
-        description={catalog.data ? `${plural(catalog.data.length, "título cadastrado", "títulos cadastrados")} no catálogo.` : "Títulos disponíveis no catálogo."}
+        description={
+          catalog.data
+            ? `${plural(catalog.data.length, "título cadastrado", "títulos cadastrados")} no catálogo.`
+            : "Títulos disponíveis no catálogo."
+        }
         actions={
           <Button onClick={() => setCreating(true)}>
             <PlusIcon data-icon="inline-start" />
@@ -105,7 +113,9 @@ export default function BooksPage() {
       ) : !catalog.isPending && books.length === 0 ? (
         <EmptyState
           title={catalog.data?.length ? "Nenhum livro encontrado" : "Nenhum livro cadastrado"}
-          description={catalog.data?.length ? "Ajuste a busca ou a categoria." : "Cadastre o primeiro título do acervo."}
+          description={
+            catalog.data?.length ? "Ajuste a busca ou a categoria." : "Cadastre o primeiro título do acervo."
+          }
           action={
             !catalog.data?.length && (
               <Button onClick={() => setCreating(true)}>
@@ -166,9 +176,13 @@ export default function BooksPage() {
                           ))}
                         </div>
                       </TableCell>
-                      <TableCell className="hidden text-right tabular md:table-cell">{formatNumber(book.paginas)}</TableCell>
+                      <TableCell className="hidden text-right tabular md:table-cell">
+                        {formatNumber(book.paginas)}
+                      </TableCell>
                       <TableCell className="hidden text-muted-foreground md:table-cell">{book.idioma}</TableCell>
-                      <TableCell className="hidden text-right tabular sm:table-cell">{formatCurrency(book.preco)}</TableCell>
+                      <TableCell className="hidden text-right tabular sm:table-cell">
+                        {formatCurrency(book.preco)}
+                      </TableCell>
                       <TableCell>
                         <AvailabilityBadge quantity={Number(book.quantidade_disponivel)} />
                       </TableCell>

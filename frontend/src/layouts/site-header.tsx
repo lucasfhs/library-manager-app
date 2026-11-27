@@ -17,7 +17,10 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-        <Link to="/" className="rounded-md text-[1.375rem] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none">
+        <Link
+          to="/"
+          className="rounded-md text-[1.375rem] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+        >
           <BrandLogo withMark />
         </Link>
         <nav aria-label="Principal" className="hidden items-center gap-1 text-sm md:flex">

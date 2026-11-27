@@ -10,7 +10,14 @@ import { PageHeader } from "@/components/page-header";
 import { EmptyState, ErrorState } from "@/components/states";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,8 +28,12 @@ import { useLibraries, useSaveLibrary, useStock } from "@/lib/queries";
 import type { Library } from "@/lib/types";
 
 const UFS = "AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO".split(" ");
-const formatCep = (value: string) => onlyDigits(value).slice(0, 8).replace(/^(\d{5})(\d)/, "$1-$2");
-const required = (label: string) => z.string().trim().min(1, `Informe ${label}.`).max(100, "Use no máximo 100 caracteres.");
+const formatCep = (value: string) =>
+  onlyDigits(value)
+    .slice(0, 8)
+    .replace(/^(\d{5})(\d)/, "$1-$2");
+const required = (label: string) =>
+  z.string().trim().min(1, `Informe ${label}.`).max(100, "Use no máximo 100 caracteres.");
 
 const schema = z.object({
   name: required("o nome"),
@@ -37,7 +48,15 @@ const schema = z.object({
 type Values = z.infer<typeof schema>;
 const empty: Values = { name: "", phone: "", postalCode: "", street: "", neighborhood: "", city: "", state: "" };
 
-function LibraryFormDialog({ library, open, onOpenChange }: { library: Library | null; open: boolean; onOpenChange: (open: boolean) => void }) {
+function LibraryFormDialog({
+  library,
+  open,
+  onOpenChange,
+}: {
+  library: Library | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const save = useSaveLibrary();
   const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: empty });
   const { reset } = form;
@@ -89,16 +108,32 @@ function LibraryFormDialog({ library, open, onOpenChange }: { library: Library |
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92svh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-heading text-xl">{library ? "Editar biblioteca" : "Nova biblioteca"}</DialogTitle>
+          <DialogTitle className="font-heading text-xl">
+            {library ? "Editar biblioteca" : "Nova biblioteca"}
+          </DialogTitle>
           <DialogDescription>Endereço e telefone aparecem para a equipe ao organizar o estoque.</DialogDescription>
         </DialogHeader>
         <form id="library-form" onSubmit={onSubmit} noValidate className="space-y-5">
           {save.error && <FormAlert>{describeError(save.error)}</FormAlert>}
           <FieldGroup>
             <TextField control={form.control} name="name" label="Nome" autoFocus />
-            <TextField control={form.control} name="phone" label="Telefone" type="tel" mask={formatPhone} placeholder="(31) 3333-0000" />
+            <TextField
+              control={form.control}
+              name="phone"
+              label="Telefone"
+              type="tel"
+              mask={formatPhone}
+              placeholder="(31) 3333-0000"
+            />
             <div className="grid gap-5 sm:grid-cols-[9rem_1fr]">
-              <TextField control={form.control} name="postalCode" label="CEP" inputMode="numeric" mask={formatCep} placeholder="00000-000" />
+              <TextField
+                control={form.control}
+                name="postalCode"
+                label="CEP"
+                inputMode="numeric"
+                mask={formatCep}
+                placeholder="00000-000"
+              />
               <TextField control={form.control} name="street" label="Rua e número" />
             </div>
             <TextField control={form.control} name="neighborhood" label="Bairro" />
@@ -111,7 +146,11 @@ function LibraryFormDialog({ library, open, onOpenChange }: { library: Library |
                   <Field data-invalid={fieldState.invalid || undefined}>
                     <FieldLabel htmlFor="library-state">Estado</FieldLabel>
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger id="library-state" className="w-full" aria-invalid={fieldState.invalid || undefined}>
+                      <SelectTrigger
+                        id="library-state"
+                        className="w-full"
+                        aria-invalid={fieldState.invalid || undefined}
+                      >
                         <SelectValue placeholder="UF" />
                       </SelectTrigger>
                       <SelectContent>

@@ -111,7 +111,7 @@ function AdminSidebar() {
         <UserMenu
           name={session?.subject}
           detail="Operador"
-          className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0 [&_.text-muted-foreground]:text-sidebar-foreground/60"
+          className="w-full justify-start text-sidebar-foreground group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground [&_.text-muted-foreground]:text-sidebar-foreground/60"
         />
       </SidebarFooter>
       <SidebarRail />

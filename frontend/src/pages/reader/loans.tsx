@@ -93,87 +93,87 @@ export default function ReaderLoansPage() {
           <TabsTrigger value="returned">Devolvidos</TabsTrigger>
         </TabsList>
 
-      <TabsContent value={filter} className="mt-6">
-      {loans.isPending ? (
-        <Card className="gap-0 p-0">
-          {Array.from({ length: 4 }, (_, index) => (
-            <div key={index} className="flex items-center gap-4 border-b p-4 last:border-0">
-              <Skeleton className="h-12 w-8 rounded-sm" />
-              <Skeleton className="h-4 w-48" />
-              <Skeleton className="ml-auto h-5 w-24 rounded-full" />
-            </div>
-          ))}
-        </Card>
-      ) : loans.isError ? (
-        <ErrorState error={loans.error} onRetry={() => loans.refetch()} />
-      ) : visible.length === 0 ? (
-        <EmptyState
-          icon={<BookOpenIcon />}
-          title={rows.length === 0 ? "Você ainda não fez empréstimos" : "Nada por aqui"}
-          description={
-            rows.length === 0
-              ? "Encontre um livro no catálogo e solicite o empréstimo na biblioteca mais próxima."
-              : "Nenhum empréstimo corresponde a este filtro."
-          }
-          action={
-            rows.length === 0 && (
-              <Button asChild>
-                <Link to="/user">Explorar catálogo</Link>
-              </Button>
-            )
-          }
-        />
-      ) : (
-        <Card className="animate-fade-in gap-0 overflow-hidden p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50 hover:bg-muted/50">
-                <TableHead className="pl-5">Livro</TableHead>
-                <TableHead className="hidden md:table-cell">Biblioteca</TableHead>
-                <TableHead className="hidden sm:table-cell">Retirada</TableHead>
-                <TableHead className="hidden sm:table-cell">Devolução</TableHead>
-                <TableHead className="pr-5 text-right">Situação</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {visible.map((loan) => (
-                <TableRow key={loan.emprestimo_id}>
-                  <TableCell className="pl-5">
-                    <div className="flex items-center gap-3">
-                      <BookCover
-                        id={loan.book?.id ?? loan.emprestimo_id}
-                        title={loan.livro}
-                        author={loan.book?.autor ?? ""}
-                        size="xs"
-                      />
-                      <div className="min-w-0">
-                        <p className="truncate font-medium">{loan.livro}</p>
-                        <p className="truncate text-xs text-muted-foreground md:hidden">{loan.biblioteca}</p>
-                        <p className="truncate text-xs text-muted-foreground sm:hidden">
-                          {formatDate(loan.emprestimo)}
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden text-muted-foreground md:table-cell">{loan.biblioteca}</TableCell>
-                  <TableCell className="hidden tabular sm:table-cell">{formatDate(loan.emprestimo)}</TableCell>
-                  <TableCell className="hidden tabular sm:table-cell">
-                    {loan.devolucao ? (
-                      formatDate(loan.devolucao)
-                    ) : (
-                      <span className="text-muted-foreground">Prazo {dueDate(loan.emprestimo)}</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="pr-5 text-right">
-                    <LoanStatusBadge status={loan.status} />
-                  </TableCell>
-                </TableRow>
+        <TabsContent value={filter} className="mt-6">
+          {loans.isPending ? (
+            <Card className="gap-0 p-0">
+              {Array.from({ length: 4 }, (_, index) => (
+                <div key={index} className="flex items-center gap-4 border-b p-4 last:border-0">
+                  <Skeleton className="h-12 w-8 rounded-sm" />
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="ml-auto h-5 w-24 rounded-full" />
+                </div>
               ))}
-            </TableBody>
-          </Table>
-        </Card>
-      )}
-      </TabsContent>
+            </Card>
+          ) : loans.isError ? (
+            <ErrorState error={loans.error} onRetry={() => loans.refetch()} />
+          ) : visible.length === 0 ? (
+            <EmptyState
+              icon={<BookOpenIcon />}
+              title={rows.length === 0 ? "Você ainda não fez empréstimos" : "Nada por aqui"}
+              description={
+                rows.length === 0
+                  ? "Encontre um livro no catálogo e solicite o empréstimo na biblioteca mais próxima."
+                  : "Nenhum empréstimo corresponde a este filtro."
+              }
+              action={
+                rows.length === 0 && (
+                  <Button asChild>
+                    <Link to="/user">Explorar catálogo</Link>
+                  </Button>
+                )
+              }
+            />
+          ) : (
+            <Card className="animate-fade-in gap-0 overflow-hidden p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="pl-5">Livro</TableHead>
+                    <TableHead className="hidden md:table-cell">Biblioteca</TableHead>
+                    <TableHead className="hidden sm:table-cell">Retirada</TableHead>
+                    <TableHead className="hidden sm:table-cell">Devolução</TableHead>
+                    <TableHead className="pr-5 text-right">Situação</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {visible.map((loan) => (
+                    <TableRow key={loan.emprestimo_id}>
+                      <TableCell className="pl-5">
+                        <div className="flex items-center gap-3">
+                          <BookCover
+                            id={loan.book?.id ?? loan.emprestimo_id}
+                            title={loan.livro}
+                            author={loan.book?.autor ?? ""}
+                            size="xs"
+                          />
+                          <div className="min-w-0">
+                            <p className="truncate font-medium">{loan.livro}</p>
+                            <p className="truncate text-xs text-muted-foreground md:hidden">{loan.biblioteca}</p>
+                            <p className="truncate text-xs text-muted-foreground sm:hidden">
+                              {formatDate(loan.emprestimo)}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden text-muted-foreground md:table-cell">{loan.biblioteca}</TableCell>
+                      <TableCell className="hidden tabular sm:table-cell">{formatDate(loan.emprestimo)}</TableCell>
+                      <TableCell className="hidden tabular sm:table-cell">
+                        {loan.devolucao ? (
+                          formatDate(loan.devolucao)
+                        ) : (
+                          <span className="text-muted-foreground">Prazo {dueDate(loan.emprestimo)}</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="pr-5 text-right">
+                        <LoanStatusBadge status={loan.status} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
+        </TabsContent>
       </Tabs>
     </div>
   );

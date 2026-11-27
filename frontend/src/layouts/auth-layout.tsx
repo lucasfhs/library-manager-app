@@ -21,8 +21,14 @@ export function AuthLayout({ aside, children }: AuthLayoutProps) {
   return (
     <div className="grid min-h-svh lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
       <aside className="relative hidden overflow-hidden bg-rich-black p-10 text-mint-green lg:sticky lg:top-0 lg:flex lg:h-svh lg:flex-col xl:p-14">
-        <div aria-hidden="true" className="absolute -top-32 -left-24 size-96 rounded-full bg-spring-green/20 blur-3xl" />
-        <Link to="/" className="relative w-fit rounded-md text-2xl text-white focus-visible:ring-3 focus-visible:ring-spring-green/50 focus-visible:outline-none">
+        <div
+          aria-hidden="true"
+          className="absolute -top-32 -left-24 size-96 rounded-full bg-spring-green/20 blur-3xl"
+        />
+        <Link
+          to="/"
+          className="relative w-fit rounded-md text-2xl text-white focus-visible:ring-3 focus-visible:ring-spring-green/50 focus-visible:outline-none"
+        >
           <BrandLogo withMark onDark />
         </Link>
         <div className="relative mt-auto max-w-md">

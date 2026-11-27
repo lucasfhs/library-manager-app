@@ -12,7 +12,11 @@ import { formatCpf, formatPhone, initials, onlyDigits, plural } from "@/lib/form
 import { useReaders } from "@/lib/queries";
 import { useLoanRows } from "@/lib/use-loan-rows";
 
-const normalize = (value: string) => value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+const normalize = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
 
 export default function ReadersPage() {
   const readers = useReaders();
@@ -48,7 +52,11 @@ export default function ReadersPage() {
       <PageHeader
         eyebrow="Circulação"
         title="Leitores"
-        description={readers.data ? `${plural(readers.data.length, "leitor cadastrado", "leitores cadastrados")}.` : "Pessoas cadastradas para empréstimos."}
+        description={
+          readers.data
+            ? `${plural(readers.data.length, "leitor cadastrado", "leitores cadastrados")}.`
+            : "Pessoas cadastradas para empréstimos."
+        }
       />
       <InputGroup className="sm:max-w-xs">
         <InputGroupAddon>
@@ -105,7 +113,7 @@ export default function ReadersPage() {
                           </div>
                         </TableCell>
                         <TableCell className="hidden tabular md:table-cell">{formatCpf(reader.cpf)}</TableCell>
-                        <TableCell className="hidden tabular text-muted-foreground lg:table-cell">
+                        <TableCell className="hidden text-muted-foreground tabular lg:table-cell">
                           {formatPhone(reader.telefone)}
                         </TableCell>
                         <TableCell className="hidden text-muted-foreground sm:table-cell">

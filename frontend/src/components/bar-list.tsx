@@ -21,7 +21,10 @@ export function BarList({ items, unit, ariaLabel }: BarListProps) {
         <li key={item.label}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="group -mx-2 rounded-md px-2 py-1 outline-none hover:bg-muted/60 focus-visible:bg-muted/60" tabIndex={0}>
+              <div
+                className="group -mx-2 rounded-md px-2 py-1 outline-none hover:bg-muted/60 focus-visible:bg-muted/60"
+                tabIndex={0}
+              >
                 <div className="flex items-baseline justify-between gap-4 text-sm">
                   <span className="truncate">{item.label}</span>
                   <span className="font-medium tabular">{formatNumber(item.value)}</span>

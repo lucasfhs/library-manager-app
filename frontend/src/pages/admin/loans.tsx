@@ -20,7 +20,11 @@ import { useReturnLoan } from "@/lib/queries";
 import { useLoanRows, type LoanRow } from "@/lib/use-loan-rows";
 import { LoanFormDialog } from "./loan-form-dialog";
 
-const normalize = (value: string) => value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+const normalize = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
 
 const filters: { value: "all" | LoanStatus; label: string }[] = [
   { value: "all", label: "Todos" },
@@ -62,7 +66,9 @@ export default function LoansPage() {
       .filter(
         (row) =>
           !term ||
-          normalize(`${row.book?.titulo ?? ""} ${row.reader?.nome ?? ""} ${row.loan.cpfUsuario} ${row.library?.nome ?? ""}`).includes(term)
+          normalize(
+            `${row.book?.titulo ?? ""} ${row.reader?.nome ?? ""} ${row.loan.cpfUsuario} ${row.library?.nome ?? ""}`
+          ).includes(term)
       );
   }, [rows, status, query]);
 
@@ -95,7 +101,7 @@ export default function LoansPage() {
       />
 
       <Tabs value={status} onValueChange={(value) => setParam("status", value === "all" ? null : value)}>
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <TabsList>
             {filters.map((filter) => (
               <TabsTrigger key={filter.value} value={filter.value} className="gap-1.5">
@@ -108,105 +114,119 @@ export default function LoansPage() {
               </TabsTrigger>
             ))}
           </TabsList>
-        <InputGroup className="lg:max-w-xs">
-          <InputGroupAddon>
-            <SearchIcon />
-          </InputGroupAddon>
-          <InputGroupInput
-            type="search"
-            placeholder="Buscar livro, leitor ou CPF"
-            aria-label="Buscar livro, leitor ou CPF"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </InputGroup>
-      </div>
+          <InputGroup className="lg:max-w-xs">
+            <InputGroupAddon>
+              <SearchIcon />
+            </InputGroupAddon>
+            <InputGroupInput
+              type="search"
+              placeholder="Buscar livro, leitor ou CPF"
+              aria-label="Buscar livro, leitor ou CPF"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          </InputGroup>
+        </div>
 
-      <TabsContent value={status} className="mt-6">
-      {error ? (
-        <ErrorState error={error} onRetry={refetch} />
-      ) : !isPending && visible.length === 0 ? (
-        <EmptyState title="Nenhum empréstimo encontrado" description="Altere o filtro ou registre um novo empréstimo." />
-      ) : (
-        <Card className="gap-0 overflow-hidden p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50 hover:bg-muted/50">
-                <TableHead className="pl-5">Livro</TableHead>
-                <TableHead className="hidden md:table-cell">Leitor</TableHead>
-                <TableHead className="hidden xl:table-cell">Biblioteca</TableHead>
-                <TableHead className="hidden sm:table-cell">Retirada</TableHead>
-                <TableHead className="hidden lg:table-cell">Devolução</TableHead>
-                <TableHead>Situação</TableHead>
-                <TableHead className="pr-5 text-right">
-                  <span className="sr-only">Ações</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isPending
-                ? Array.from({ length: 6 }, (_, index) => (
-                    <TableRow key={index}>
-                      <TableCell colSpan={7} className="pl-5">
-                        <Skeleton className="h-10 w-full" />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                : visible.map((row) => {
-                    const { loan, book, reader, library } = row;
-                    const days = daysSince(loan.dataEmprestimo);
-                    return (
-                      <TableRow key={loan.id}>
-                        <TableCell className="pl-5">
-                          <div className="flex items-center gap-3">
-                            <BookCover id={loan.idLivro} title={book?.titulo ?? ""} author={book?.autor ?? ""} size="xs" />
-                            <div className="min-w-0">
-                              <p className="max-w-56 truncate font-medium">{book?.titulo ?? `Livro #${loan.idLivro}`}</p>
-                              <p className="max-w-56 truncate text-xs text-muted-foreground md:hidden">
-                                {reader?.nome ?? formatCpf(loan.cpfUsuario)}
-                              </p>
-                              <p className="text-xs text-muted-foreground tabular">#{loan.id}</p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          <p className="max-w-48 truncate">{reader?.nome ?? "—"}</p>
-                          <p className="text-xs text-muted-foreground tabular">{formatCpf(loan.cpfUsuario)}</p>
-                        </TableCell>
-                        <TableCell className="hidden max-w-48 truncate text-muted-foreground xl:table-cell">
-                          {library?.nome}
-                        </TableCell>
-                        <TableCell className="hidden tabular sm:table-cell">{formatDate(loan.dataEmprestimo)}</TableCell>
-                        <TableCell className="hidden tabular lg:table-cell">
-                          {loan.dataDevolucao ? (
-                            formatDate(loan.dataDevolucao)
-                          ) : (
-                            <span className={row.status === "overdue" ? "text-destructive" : "text-muted-foreground"}>
-                              {row.status === "overdue"
-                                ? `${days - LOAN_PERIOD_DAYS} dias de atraso`
-                                : `${LOAN_PERIOD_DAYS - days} dias restantes`}
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <LoanStatusBadge status={row.status} />
-                        </TableCell>
-                        <TableCell className="pr-5 text-right">
-                          {!loan.dataDevolucao && (
-                            <Button size="sm" variant="outline" onClick={() => setReturning(row)}>
-                              <UndoDotIcon data-icon="inline-start" />
-                              Devolver
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-            </TableBody>
-          </Table>
-        </Card>
-      )}
-      </TabsContent>
+        <TabsContent value={status} className="mt-6">
+          {error ? (
+            <ErrorState error={error} onRetry={refetch} />
+          ) : !isPending && visible.length === 0 ? (
+            <EmptyState
+              title="Nenhum empréstimo encontrado"
+              description="Altere o filtro ou registre um novo empréstimo."
+            />
+          ) : (
+            <Card className="gap-0 overflow-hidden p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="pl-5">Livro</TableHead>
+                    <TableHead className="hidden md:table-cell">Leitor</TableHead>
+                    <TableHead className="hidden xl:table-cell">Biblioteca</TableHead>
+                    <TableHead className="hidden sm:table-cell">Retirada</TableHead>
+                    <TableHead className="hidden lg:table-cell">Devolução</TableHead>
+                    <TableHead>Situação</TableHead>
+                    <TableHead className="pr-5 text-right">
+                      <span className="sr-only">Ações</span>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isPending
+                    ? Array.from({ length: 6 }, (_, index) => (
+                        <TableRow key={index}>
+                          <TableCell colSpan={7} className="pl-5">
+                            <Skeleton className="h-10 w-full" />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    : visible.map((row) => {
+                        const { loan, book, reader, library } = row;
+                        const days = daysSince(loan.dataEmprestimo);
+                        return (
+                          <TableRow key={loan.id}>
+                            <TableCell className="pl-5">
+                              <div className="flex items-center gap-3">
+                                <BookCover
+                                  id={loan.idLivro}
+                                  title={book?.titulo ?? ""}
+                                  author={book?.autor ?? ""}
+                                  size="xs"
+                                />
+                                <div className="min-w-0">
+                                  <p className="max-w-56 truncate font-medium">
+                                    {book?.titulo ?? `Livro #${loan.idLivro}`}
+                                  </p>
+                                  <p className="max-w-56 truncate text-xs text-muted-foreground md:hidden">
+                                    {reader?.nome ?? formatCpf(loan.cpfUsuario)}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground tabular">#{loan.id}</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              <p className="max-w-48 truncate">{reader?.nome ?? "—"}</p>
+                              <p className="text-xs text-muted-foreground tabular">{formatCpf(loan.cpfUsuario)}</p>
+                            </TableCell>
+                            <TableCell className="hidden max-w-48 truncate text-muted-foreground xl:table-cell">
+                              {library?.nome}
+                            </TableCell>
+                            <TableCell className="hidden tabular sm:table-cell">
+                              {formatDate(loan.dataEmprestimo)}
+                            </TableCell>
+                            <TableCell className="hidden tabular lg:table-cell">
+                              {loan.dataDevolucao ? (
+                                formatDate(loan.dataDevolucao)
+                              ) : (
+                                <span
+                                  className={row.status === "overdue" ? "text-destructive" : "text-muted-foreground"}
+                                >
+                                  {row.status === "overdue"
+                                    ? `${days - LOAN_PERIOD_DAYS} dias de atraso`
+                                    : `${LOAN_PERIOD_DAYS - days} dias restantes`}
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <LoanStatusBadge status={row.status} />
+                            </TableCell>
+                            <TableCell className="pr-5 text-right">
+                              {!loan.dataDevolucao && (
+                                <Button size="sm" variant="outline" onClick={() => setReturning(row)}>
+                                  <UndoDotIcon data-icon="inline-start" />
+                                  Devolver
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
+        </TabsContent>
       </Tabs>
 
       <LoanFormDialog open={creating} onOpenChange={(open) => setParam("novo", open ? "1" : null)} />

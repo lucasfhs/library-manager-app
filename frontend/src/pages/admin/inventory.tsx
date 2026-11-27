@@ -22,7 +22,11 @@ import type { StockEntry } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { StockFormDialog } from "./stock-form-dialog";
 
-const normalize = (value: string) => value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+const normalize = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
 
 function QuantityEditor({ entry, title }: { entry: StockEntry; title: string }) {
   const save = useSaveStock();
@@ -45,7 +49,12 @@ function QuantityEditor({ entry, title }: { entry: StockEntry; title: string }) 
 
   return (
     <div className="flex items-center gap-2">
-      <div className={cn("flex items-center rounded-lg border bg-background transition-shadow", dirty && "border-brand-ink/50 ring-3 ring-brand/20")}>
+      <div
+        className={cn(
+          "flex items-center rounded-lg border bg-background transition-shadow",
+          dirty && "border-brand-ink/50 ring-3 ring-brand/20"
+        )}
+      >
         <Button
           variant="ghost"
           size="icon-sm"
@@ -64,7 +73,7 @@ function QuantityEditor({ entry, title }: { entry: StockEntry; title: string }) 
             setDraft(Number.isNaN(parsed) ? 0 : parsed);
           }}
           onKeyDown={(event) => event.key === "Enter" && dirty && commit()}
-          className="h-7 w-12 border-0 bg-transparent px-0 text-center font-medium shadow-none tabular focus-visible:ring-0 dark:bg-transparent"
+          className="h-7 w-12 border-0 bg-transparent px-0 text-center font-medium tabular shadow-none focus-visible:ring-0 dark:bg-transparent"
         />
         <Button
           variant="ghost"
@@ -84,7 +93,13 @@ function QuantityEditor({ entry, title }: { entry: StockEntry; title: string }) 
           </Button>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button size="icon-sm" variant="ghost" aria-label="Desfazer" onClick={() => setDraft(null)} disabled={save.isPending}>
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                aria-label="Desfazer"
+                onClick={() => setDraft(null)}
+                disabled={save.isPending}
+              >
                 <RotateCcwIcon />
               </Button>
             </TooltipTrigger>
@@ -224,7 +239,9 @@ export default function InventoryPage() {
                             <div className="min-w-0">
                               <p className="max-w-64 truncate font-medium">{title}</p>
                               <p className="max-w-64 truncate text-xs text-muted-foreground md:hidden">{unit?.nome}</p>
-                              <p className="hidden max-w-64 truncate text-xs text-muted-foreground md:block">{book?.autor}</p>
+                              <p className="hidden max-w-64 truncate text-xs text-muted-foreground md:block">
+                                {book?.autor}
+                              </p>
                             </div>
                           </div>
                         </TableCell>

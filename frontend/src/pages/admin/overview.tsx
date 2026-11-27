@@ -84,7 +84,12 @@ export default function OverviewPage() {
           loading={loans.isPending}
           hint={overdue ? `${plural(overdue, "atrasado", "atrasados")}` : "Nenhum atraso"}
         />
-        <StatCard label="Leitores cadastrados" value={readers.data?.length ?? 0} icon={<UsersIcon />} loading={readers.isPending} />
+        <StatCard
+          label="Leitores cadastrados"
+          value={readers.data?.length ?? 0}
+          icon={<UsersIcon />}
+          loading={readers.isPending}
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-5">

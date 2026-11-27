@@ -28,7 +28,12 @@ const schema = z.object({
   title: z.string().trim().min(1, "Informe o título.").max(200, "Use no máximo 200 caracteres."),
   author: z.string().trim().min(1, "Informe o autor.").max(100, "Use no máximo 100 caracteres."),
   category: z.array(z.string()).min(1, "Selecione ao menos uma categoria."),
-  pages: z.string().refine((value) => Number.isInteger(Number(value)) && Number(value) >= 1, "Informe um número inteiro maior que zero."),
+  pages: z
+    .string()
+    .refine(
+      (value) => Number.isInteger(Number(value)) && Number(value) >= 1,
+      "Informe um número inteiro maior que zero."
+    ),
   price: z
     .string()
     .refine((value) => value !== "" && Number(value.replace(",", ".")) > 0, "Informe um preço maior que zero."),
@@ -94,7 +99,9 @@ export function BookFormDialog({ open, onOpenChange, book }: BookFormDialogProps
         <DialogHeader>
           <DialogTitle className="font-heading text-xl">{book ? "Editar livro" : "Novo livro"}</DialogTitle>
           <DialogDescription>
-            {book ? "As alterações aparecem no catálogo dos leitores." : "O título entra no catálogo sem exemplares; vincule-o a uma biblioteca no Estoque."}
+            {book
+              ? "As alterações aparecem no catálogo dos leitores."
+              : "O título entra no catálogo sem exemplares; vincule-o a uma biblioteca no Estoque."}
           </DialogDescription>
         </DialogHeader>
         <form id="book-form" onSubmit={onSubmit} noValidate className="space-y-5">
@@ -133,7 +140,14 @@ export function BookFormDialog({ open, onOpenChange, book }: BookFormDialogProps
               )}
             />
             <div className="grid gap-5 sm:grid-cols-3">
-              <TextField control={form.control} name="pages" label="Páginas" type="number" min={1} inputMode="numeric" />
+              <TextField
+                control={form.control}
+                name="pages"
+                label="Páginas"
+                type="number"
+                min={1}
+                inputMode="numeric"
+              />
               <TextField
                 control={form.control}
                 name="price"

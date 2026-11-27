@@ -7,7 +7,14 @@ import { Combobox } from "@/components/combobox";
 import { FormAlert } from "@/components/form-alert";
 import { TextField } from "@/components/form-fields";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
@@ -17,7 +24,9 @@ import { useBooks, useLibraries, useSaveStock, useStock } from "@/lib/queries";
 const schema = z.object({
   book: z.string().min(1, "Selecione o livro."),
   library: z.string().min(1, "Selecione a biblioteca."),
-  amount: z.string().refine((value) => Number.isInteger(Number(value)) && Number(value) >= 0, "Informe um número inteiro."),
+  amount: z
+    .string()
+    .refine((value) => Number.isInteger(Number(value)) && Number(value) >= 0, "Informe um número inteiro."),
 });
 
 type Values = z.infer<typeof schema>;
@@ -27,7 +36,10 @@ export function StockFormDialog({ open, onOpenChange }: { open: boolean; onOpenC
   const libraries = useLibraries();
   const stock = useStock();
   const save = useSaveStock();
-  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { book: "", library: "", amount: "1" } });
+  const form = useForm<Values>({
+    resolver: zodResolver(schema),
+    defaultValues: { book: "", library: "", amount: "1" },
+  });
   const { reset } = form;
 
   useEffect(() => {
@@ -111,7 +123,14 @@ export function StockFormDialog({ open, onOpenChange }: { open: boolean; onOpenC
                 </Field>
               )}
             />
-            <TextField control={form.control} name="amount" label="Exemplares disponíveis" type="number" min={0} inputMode="numeric" />
+            <TextField
+              control={form.control}
+              name="amount"
+              label="Exemplares disponíveis"
+              type="number"
+              min={0}
+              inputMode="numeric"
+            />
           </FieldGroup>
         </form>
         <DialogFooter>

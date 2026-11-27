@@ -69,8 +69,7 @@ export async function request<T>(path: string, { method = "GET", body, signal }:
   }
 
   if (!response.ok) {
-    const message =
-      data && typeof data === "object" && "message" in data ? String(data.message) : response.statusText;
+    const message = data && typeof data === "object" && "message" in data ? String(data.message) : response.statusText;
     if (response.status === 401 && token) {
       window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
     }

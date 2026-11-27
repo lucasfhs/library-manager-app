@@ -51,9 +51,7 @@ export function BookSheet({ book, cpf, openLoans, blockedReason, onOpenChange }:
     }
   };
 
-  const notice = alreadyBorrowed
-    ? "Você já está com um exemplar deste livro."
-    : blockedReason;
+  const notice = alreadyBorrowed ? "Você já está com um exemplar deste livro." : blockedReason;
 
   return (
     <Sheet open={Boolean(book)} onOpenChange={onOpenChange}>
@@ -127,8 +125,7 @@ export function BookSheet({ book, cpf, openLoans, blockedReason, onOpenChange }:
                   </li>
                 )}
                 {availability.data?.map((entry) => {
-                  const pending =
-                    createLoan.isPending && createLoan.variables?.idLibrary === entry.id;
+                  const pending = createLoan.isPending && createLoan.variables?.idLibrary === entry.id;
                   return (
                     <li
                       key={entry.id}

@@ -107,14 +107,10 @@ export default function LandingPage() {
               </h1>
               <p className="mt-6 max-w-xl text-lg text-muted-foreground">
                 O Library Manager reúne o acervo de várias bibliotecas em um só lugar. Leitores consultam a
-                disponibilidade e solicitam empréstimos; operadores cuidam do estoque, das devoluções e dos
-                relatórios.
+                disponibilidade e solicitam empréstimos; operadores cuidam do estoque, das devoluções e dos relatórios.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                <Button
-                  asChild
-                  className="h-11 bg-brand px-5 text-[0.9375rem] text-brand-foreground hover:bg-brand/85"
-                >
+                <Button asChild className="h-11 bg-brand px-5 text-[0.9375rem] text-brand-foreground hover:bg-brand/85">
                   <Link to="/loginUser">
                     Consultar o acervo
                     <ArrowRightIcon data-icon="inline-end" />
@@ -131,9 +127,7 @@ export default function LandingPage() {
                   ["Regras", "Validadas no PostgreSQL"],
                 ].map(([term, detail]) => (
                   <div key={term}>
-                    <dt className="text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
-                      {term}
-                    </dt>
+                    <dt className="text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">{term}</dt>
                     <dd className="mt-1 font-medium">{detail}</dd>
                   </div>
                 ))}
@@ -141,7 +135,7 @@ export default function LandingPage() {
             </div>
 
             <div className="relative animate-fade-up [animation-delay:120ms]">
-              <div className="relative overflow-hidden rounded-3xl bg-rich-black p-8 shadow-2xl shadow-rich-black/25 ring-1 ring-white/10 sm:p-10">
+              <div className="relative overflow-hidden rounded-3xl bg-rich-black p-8 shadow-2xl ring-1 shadow-rich-black/25 ring-white/10 sm:p-10">
                 <div
                   aria-hidden="true"
                   className="absolute -top-24 -right-20 size-72 rounded-full bg-spring-green/25 blur-3xl"
@@ -168,11 +162,13 @@ export default function LandingPage() {
                       key={book.id}
                       {...book}
                       size="md"
-                      className={[
-                        "w-20 origin-bottom-right -rotate-3 sm:w-24",
-                        "z-10 w-24 sm:w-28",
-                        "w-20 origin-bottom-left rotate-3 sm:w-24",
-                      ][index]}
+                      className={
+                        [
+                          "w-20 origin-bottom-right -rotate-3 sm:w-24",
+                          "z-10 w-24 sm:w-28",
+                          "w-20 origin-bottom-left rotate-3 sm:w-24",
+                        ][index]
+                      }
                     />
                   ))}
                 </div>

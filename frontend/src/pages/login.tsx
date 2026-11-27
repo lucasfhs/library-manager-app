@@ -120,7 +120,10 @@ export default function LoginPage({ role }: { role: Role }) {
             {text.register.label}
           </Link>
         </p>
-        <Link to={text.other.to} className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+        <Link
+          to={text.other.to}
+          className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        >
           {text.other.label}
         </Link>
       </div>
