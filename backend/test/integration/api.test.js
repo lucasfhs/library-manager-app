@@ -48,3 +48,62 @@ test("authenticated catalog request returns seeded books", async () => {
   expect(body.length).toBeGreaterThan(0);
   expect(body[0]).toHaveProperty("img_url");
 });
+
+async function post(path, body, token) {
+  return fetch(`${baseUrl}${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+}
+
+test("operator login issues a token with the operator role", async () => {
+  const response = await post("/auth/loginAdmin", { userLogin: "admin", password: "admin" });
+  const body = await response.json();
+
+  expect(response.status).toBe(200);
+  const payload = jwt.verify(body.result, process.env.SECRET_KEY);
+  expect(payload).toMatchObject({ userLogin: "admin", role: "operator" });
+  expect(payload).not.toHaveProperty("password");
+});
+
+test("invalid credentials answer 401", async () => {
+  const response = await post("/auth/loginAdmin", { userLogin: "admin", password: "wrong" });
+
+  expect(response.status).toBe(401);
+});
+
+describe("reader session", () => {
+  const cpf = "32168781044";
+  let token;
+
+  beforeAll(async () => {
+    const response = await post("/auth/loginUser", { cpfUser: cpf, password: "1234" });
+    expect(response.status).toBe(200);
+    token = (await response.json()).result;
+  });
+
+  test("reads its own profile without the password", async () => {
+    const response = await fetch(`${baseUrl}/user/${cpf}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.cpf).toBe(cpf);
+    expect(body).not.toHaveProperty("senha");
+  });
+
+  test("cannot change the catalog", async () => {
+    const response = await post(
+      "/book",
+      { title: "x", author: "y", category: ["Romance"], pages: 1, price: 1, language: "Português" },
+      token
+    );
+
+    expect(response.status).toBe(403);
+  });
+});

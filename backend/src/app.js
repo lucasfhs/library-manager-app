@@ -3,6 +3,7 @@ const cors = require("cors");
 
 const database = require("./config/database");
 const authMiddleware = require("./middleware/auth");
+const authorize = require("./middleware/authorize");
 const apiRegisterAuthRouter = require("./routers/apiUserRegister_Auth");
 const userRegisterRouter = require("./routers/userRegister");
 const apiUserRouter = require("./routers/apiUser");
@@ -42,6 +43,7 @@ app.get("/health", async (_req, res) => {
 app.use(apiRegisterAuthRouter);
 app.use(userRegisterRouter);
 app.use(authMiddleware);
+app.use(authorize);
 app.use(apiUserRouter);
 app.use(userRouter);
 app.use(bookRouter);

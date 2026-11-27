@@ -39,7 +39,6 @@ class User {
       address.postal_code,
       password,
     ];
-    console.log(values);
     try {
       const result = await client.query(query, values);
       return this._mapRowToUser(result.rows[0]);

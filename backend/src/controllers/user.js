@@ -1,11 +1,12 @@
 const ServiceUser = require("../services/user");
+const withoutPassword = require("../utils/withoutPassword");
 const service = new ServiceUser();
 class ControllerUser {
   async get(req, res) {
     try {
       const cpf = req.params.cpf;
       const user = await service.get(cpf);
-      res.status(200).json(user);
+      res.status(200).json(withoutPassword(user));
     } catch (error) {
       res.status(500).json({ message: "User not exists." });
     }
@@ -13,7 +14,7 @@ class ControllerUser {
   async getAll(req, res) {
     try {
       const user = await service.getAll();
-      res.status(200).json(user);
+      res.status(200).json(withoutPassword(user));
     } catch (error) {
       res.status(500).json({ message: "User not exists." });
     }
@@ -33,7 +34,9 @@ class ControllerUser {
         password,
         address
       );
-      res.status(200).json({ message: "User updated successfully.", result });
+      res
+        .status(200)
+        .json({ message: "User updated successfully.", result: withoutPassword(result) });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -42,8 +45,6 @@ class ControllerUser {
     try {
       const { cpf, name, email, phoneNumber, birthDate, password, address } =
         req.body;
-      console.log(address);
-
       const result = await service.post(
         cpf,
         name,
@@ -55,7 +56,10 @@ class ControllerUser {
       );
       res
         .status(201)
-        .json({ message: "The user has been created successfully.", result });
+        .json({
+          message: "The user has been created successfully.",
+          result: withoutPassword(result),
+        });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

@@ -66,7 +66,6 @@ class RepositoryUser {
   }
   async put(cpf, name, email, phoneNumber, birthDate, password, address) {
     try {
-      console.log(cpf, name, email, phoneNumber, birthDate, address, password);
       if (!name) {
         throw new Error("User name cannot be null.");
       } else if (!cpf) {

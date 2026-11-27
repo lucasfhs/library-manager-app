@@ -1,7 +1,6 @@
 const Library = require("../models/library");
 class RepositoryLibrary {
   async post(name, address, phoneNumber) {
-    console.log(name, address, phoneNumber);
     try {
       if (!name) {
         throw new Error("Name cannot be null.");

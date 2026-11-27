@@ -33,7 +33,7 @@ class ServiceApiUser {
       } else if (user.senha != password) {
         throw new Error("Senha incorreta");
       }
-      return await signAsync({ userLogin }, process.env.SECRET_KEY, {
+      return await signAsync({ userLogin, role: "operator" }, process.env.SECRET_KEY, {
         expiresIn: TOKEN_LIFETIME_SECONDS,
       });
     } catch (err) {
@@ -49,7 +49,7 @@ class ServiceApiUser {
       } else if (user.senha != password) {
         throw new Error("Senha incorreta");
       }
-      return await signAsync({ cpfUser }, process.env.SECRET_KEY, {
+      return await signAsync({ cpfUser, role: "reader" }, process.env.SECRET_KEY, {
         expiresIn: TOKEN_LIFETIME_SECONDS,
       });
     } catch (err) {
