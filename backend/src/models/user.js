@@ -1,5 +1,11 @@
 const client = require("../config/database");
 
+// Read the composite address field by field: its text form quotes values
+// that contain commas, so splitting it on "," shifts every field.
+const COLUMNS = `cpf, nome, email, telefone, data_nascimento, senha,
+             (endereco).rua AS rua, (endereco).bairro AS bairro, (endereco).cidade AS cidade,
+             (endereco).estado AS estado, (endereco).pais AS pais, (endereco).cep AS cep`;
+
 class User {
   constructor(cpf, nome, email, telefone, dataNascimento, endereco, senha) {
     this.cpf = cpf;
@@ -23,7 +29,7 @@ class User {
     const query = `
       INSERT INTO usuario (CPF, Nome, Email, Telefone, Data_Nascimento, Endereco, Senha)
       VALUES ($1, $2, $3, $4, $5, ROW($6, $7, $8, $9, $10, $11), $12)
-      RETURNING *;
+      RETURNING ${COLUMNS};
     `;
     const values = [
       cpf,
@@ -50,8 +56,7 @@ class User {
 
   static async findByCPF(cpf) {
     const query = `
-      SELECT CPF, Nome, Email, Telefone, Data_Nascimento, 
-             Endereco::TEXT AS endereco, Senha
+      SELECT ${COLUMNS}
       FROM usuario
       WHERE CPF = $1;
     `;
@@ -69,8 +74,7 @@ class User {
 
   static async getAll() {
     const query = `
-      SELECT CPF, Nome, Email, Telefone, Data_Nascimento, 
-             Endereco::TEXT AS endereco, Senha
+      SELECT ${COLUMNS}
       FROM usuario;
     `;
     try {
@@ -96,7 +100,7 @@ class User {
       SET Nome = $1, Email = $2, Telefone = $3, Data_Nascimento = $4, 
           Endereco = ROW($5, $6, $7, $8, $9, $10), Senha = $11
       WHERE CPF = $12
-      RETURNING *;
+      RETURNING ${COLUMNS};
     `;
     const values = [
       name, // $1
@@ -137,19 +141,19 @@ class User {
   }
 
   static _mapRowToUser(row) {
-    let endereco = {};
-    if (row.endereco) {
-      const [rua, bairro, cidade, estado, pais, cep] = row.endereco
-        .replace(/["\\()]/g, "") // Remove as barras invertidas e aspas
-        .split(",")
-        .map((item) => item.trim()); // Remove espaços extras
-      endereco = { rua, bairro, cidade, estado, pais, cep };
-    }
+    const endereco = {
+      rua: row.rua,
+      bairro: row.bairro,
+      cidade: row.cidade,
+      estado: row.estado,
+      pais: row.pais,
+      cep: row.cep,
+    };
     return new User(
       row.cpf,
       row.nome,
       row.email,
-      row.telefone,
+      row.telefone?.trim(),
       row.data_nascimento,
       endereco,
       row.senha

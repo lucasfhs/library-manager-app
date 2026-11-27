@@ -107,3 +107,33 @@ describe("reader session", () => {
     expect(response.status).toBe(403);
   });
 });
+
+test("library addresses keep street names that contain commas", async () => {
+  const token = jwt.sign({ userLogin: "integration-test" }, process.env.SECRET_KEY);
+  const response = await fetch(`${baseUrl}/library/1`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const body = await response.json();
+
+  expect(response.status).toBe(200);
+  expect(body.endereco).toEqual({
+    rua: "Av. Brasil, 500",
+    bairro: "Centro",
+    cidade: "Rio de Janeiro",
+    estado: "RJ",
+    pais: "Brasil",
+    cep: "20040-000",
+  });
+});
+
+test("loan dates are serialized as calendar dates", async () => {
+  const token = jwt.sign({ userLogin: "integration-test" }, process.env.SECRET_KEY);
+  const response = await fetch(`${baseUrl}/loan/2`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const body = await response.json();
+
+  expect(response.status).toBe(200);
+  expect(body.dataEmprestimo).toBe("2024-01-01");
+  expect(body.dataDevolucao).toBe("2024-01-10");
+});

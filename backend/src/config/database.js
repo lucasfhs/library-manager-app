@@ -1,5 +1,10 @@
 require("dotenv").config({ quiet: true });
-const { Pool } = require("pg");
+const { Pool, types } = require("pg");
+
+// Return DATE columns as "YYYY-MM-DD" strings. The default conversion to a
+// JavaScript Date at local midnight shifts the day when serialized in a
+// timezone ahead of UTC.
+types.setTypeParser(types.builtins.DATE, (value) => value);
 
 const pool = new Pool({
   host: process.env.DB_HOST,

@@ -1,5 +1,11 @@
 const client = require("../config/database");
 
+// Read the composite address field by field: its text form quotes values
+// that contain commas, so splitting it on "," shifts every field.
+const COLUMNS = `id, nome, telefone,
+             (endereco).rua AS rua, (endereco).bairro AS bairro, (endereco).cidade AS cidade,
+             (endereco).estado AS estado, (endereco).pais AS pais, (endereco).cep AS cep`;
+
 class Library {
   constructor(id, nome, endereco, telefone) {
     this.id = id;
@@ -12,7 +18,7 @@ class Library {
     const query = `
       INSERT INTO biblioteca (nome, endereco, telefone)
       VALUES ($1, ROW($2, $3, $4, $5, $6, $7), $8)
-      RETURNING *;
+      RETURNING ${COLUMNS};
     `;
     const values = [
       nome,
@@ -37,7 +43,7 @@ class Library {
 
   static async findById(id) {
     const query = `
-      SELECT id, nome, telefone, endereco::TEXT AS endereco
+      SELECT ${COLUMNS}
       FROM biblioteca
       WHERE id = $1;
     `;
@@ -55,7 +61,7 @@ class Library {
 
   static async getAll() {
     const query = `
-      SELECT id, nome, telefone, endereco::TEXT AS endereco
+      SELECT ${COLUMNS}
       FROM biblioteca;
     `;
     try {
@@ -72,7 +78,7 @@ class Library {
       UPDATE biblioteca
       SET nome = $1, endereco = ROW($2, $3, $4, $5, $6, $7), telefone = $8
       WHERE id = $9
-      RETURNING *;
+      RETURNING ${COLUMNS};
     `;
     const values = [
       nome,
@@ -110,15 +116,15 @@ class Library {
   }
 
   static _mapRowToLibrary(row) {
-    let endereco = {};
-    if (row.endereco) {
-      const [rua, bairro, cidade, estado, pais, cep] = row.endereco
-        .replace(/["\\()]/g, "")
-        .split(",")
-        .map((item) => item.trim());
-      endereco = { rua, bairro, cidade, estado, pais, cep };
-    }
-    return new Library(row.id, row.nome, endereco, row.telefone);
+    const endereco = {
+      rua: row.rua,
+      bairro: row.bairro,
+      cidade: row.cidade,
+      estado: row.estado,
+      pais: row.pais,
+      cep: row.cep,
+    };
+    return new Library(row.id, row.nome, endereco, row.telefone?.trim());
   }
 }
 
