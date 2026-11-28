@@ -9,13 +9,25 @@ Checkout real em modo de teste, sem cobrança de verdade.
 
 | Arquivo | Conteúdo | Duração aproximada | Tamanho |
 | --- | --- | --- | --- |
-| [library-manager-demo.gif](./library-manager-demo.gif) | Visão geral das oito etapas | 34 s | 3,4 MiB |
-| [library-manager-admin.gif](./library-manager-admin.gif) | Painel, livros, estoque e devoluções | 24 s | 1,4 MiB |
-| [library-manager-catalogo.gif](./library-manager-catalogo.gif) | Catálogo do leitor, pedido de empréstimo e histórico | 13 s | 0,5 MiB |
-| [library-manager-pagamento.gif](./library-manager-pagamento.gif) | Multas por atraso pagas no Stripe Checkout (modo de teste) | 13 s | 0,7 MiB |
+| [library-manager-demo.gif](./library-manager-demo.gif) | Visão geral das oito etapas | 32 s | 5,74 MiB |
+| [library-manager-admin.gif](./library-manager-admin.gif) | Painel, livros, estoque e devoluções | 24 s | 2,34 MiB |
+| [library-manager-catalogo.gif](./library-manager-catalogo.gif) | Catálogo do leitor, pedido de empréstimo e histórico | 13 s | 0,91 MiB |
+| [library-manager-pagamento.gif](./library-manager-pagamento.gif) | Multas por atraso pagas no Stripe Checkout (modo de teste) | 13 s | 1,43 MiB |
 
-Todos têm resolução de **1280 × 1000**, legendas em português e reprodução em loop.
+Todos têm resolução de **1280 × 1000**, **25 fps constantes (40 ms por quadro)**,
+legendas em português e reprodução em loop.
 A ilustração original `domestic-life-illustrated.jpg` foi preservada.
+
+### Fluidez da montagem
+
+O renderizador anterior produzia cerca de 1 a 3 quadros por segundo em média,
+com quadros estáticos que duravam mais de dois segundos. Agora cursor, transições,
+destaque dos cliques e barras de progresso são renderizados quadro a quadro a 25 fps,
+sem acelerar as legendas para compensar a falta de quadros.
+
+Os 25 fps se referem à **montagem editorial das capturas existentes**; não são uma
+nova gravação contínua do navegador. A montagem não inventa estados intermediários
+dos formulários, resultados da API ou animações internas que não foram capturadas.
 
 ## O que a demonstração comprova
 
@@ -119,9 +131,13 @@ python3 preview/tools/render.py
 ```
 
 O renderizador recria os GIFs desta pasta (o de pagamento, quando houver cenas de
-pagamento) com uma paleta compartilhada,
-transições entre seções e movimentos de cursor. O FFmpeg otimiza os retângulos
-alterados sem acrescentar telas fictícias.
+pagamento) com uma paleta compartilhada e uma linha do tempo de 25 fps.
+As transições usam oito quadros, os movimentos do cursor usam até doze quadros e
+o progresso avança continuamente, mantendo as pausas de leitura. Os quadros são
+enviados ao FFmpeg por streaming, com um intermediário temporário sem perdas,
+evitando manter centenas de imagens grandes na memória. O FFmpeg otimiza os
+retângulos alterados sem acrescentar telas fictícias. Cada arquivo só substitui
+o GIF anterior depois de passar pelas validações.
 
 ### 4. Revisar
 
@@ -132,9 +148,12 @@ Os intermediários ficam em `preview/tools/.capture/`, ignorado pelo Git:
   encontrar o formulário de cartão.
 - `scenes.json`: ordem, duração, rota, legendas e posições do cursor.
 - `validation.json`: verificações de cada etapa e erros do navegador.
-- `render-validation.json`: tamanho, resolução e duração dos GIFs.
+- `render-validation.json`: tamanho, resolução, duração, número de quadros,
+  fps e intervalo entre quadros dos GIFs.
 - `backend.log`, `frontend.log` e `frontend-build.log`: logs da execução.
 
 O renderizador verifica que os GIFs têm mais de um quadro, loop infinito,
-resolução esperada e tamanho inferior a 10 MiB por arquivo. Confira também
-a reprodução dos GIFs e sua legibilidade no README.
+resolução esperada e tamanho inferior a 10 MiB por arquivo. Todos os quadros são
+decodificados para conferir que sua quantidade corresponde à linha do tempo e que
+cada um dura exatamente 40 ms. Confira também a reprodução dos GIFs e sua
+legibilidade no README.

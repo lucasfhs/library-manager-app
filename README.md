@@ -5,7 +5,7 @@
 <p align="center">
   <img src="./preview/library-manager-demo.gif" alt="Tour animado do Library Manager: página inicial, login de operador, painel, edição de livro, ajuste de estoque, devolução de empréstimo, catálogo do leitor com pedido de empréstimo e histórico" width="960">
   <br>
-  <sub>Visão geral · 34 segundos · Reprodução em loop</sub>
+  <sub>Visão geral · 32 segundos · 25 fps · Reprodução em loop</sub>
 </p>
 
 **Gestão de bibliotecas · React + shadcn/ui + Express + PostgreSQL**
@@ -56,7 +56,7 @@ Painel, edição de livro, ajuste de estoque e devolução de um empréstimo atr
 <p align="center">
   <img src="./preview/library-manager-admin.gif" alt="Demonstração animada do painel do operador, da edição de páginas de um livro, do ajuste de 2 para 4 exemplares e da devolução de um empréstimo atrasado" width="960" loading="lazy">
   <br>
-  <sub>Operadores · Painel, livros, estoque e circulação</sub>
+  <sub>Operadores · Painel, livros, estoque e circulação · 25 fps</sub>
 </p>
 
 #### Área do leitor
@@ -66,7 +66,7 @@ Busca no catálogo, disponibilidade por biblioteca, pedido de empréstimo e hist
 <p align="center">
   <img src="./preview/library-manager-catalogo.gif" alt="Demonstração animada da busca no catálogo, da ficha do livro com bibliotecas disponíveis, do pedido de empréstimo e do histórico do leitor" width="960" loading="lazy">
   <br>
-  <sub>Leitores · Catálogo, empréstimo e histórico</sub>
+  <sub>Leitores · Catálogo, empréstimo e histórico · 25 fps</sub>
 </p>
 
 #### Multas e pagamento com Stripe
@@ -76,7 +76,7 @@ Multas por atraso calculadas no PostgreSQL e pagas no Stripe Checkout em modo de
 <p align="center">
   <img src="./preview/library-manager-pagamento.gif" alt="Demonstração animada: a leitora Ana Júlia vê sete multas por atraso que somam R$ 243,60, paga no Stripe Checkout com o cartão de teste 4242 e volta ao sistema com todas as multas quitadas" width="960" loading="lazy">
   <br>
-  <sub>Leitores · Multas, Stripe Checkout e confirmação</sub>
+  <sub>Leitores · Multas, Stripe Checkout e confirmação · 25 fps</sub>
 </p>
 
 O processo de gravação e as instruções para recriar os GIFs estão em [`preview/README.md`](./preview/README.md). A [ilustração original](./preview/domestic-life-illustrated.jpg) foi preservada.
@@ -317,7 +317,7 @@ The following preview is a **34-second tour of the actual application running lo
 <p align="center">
   <img src="./preview/library-manager-demo.gif" alt="Animated tour of Library Manager: home page, operator login, dashboard, book editing, stock adjustment, overdue loan return, reader catalog with a loan request, and loan history" width="960" loading="lazy">
   <br>
-  <sub>Overview · 34 seconds · Continuous loop</sub>
+  <sub>Overview · 32 seconds · 25 fps · Continuous loop</sub>
 </p>
 
 #### Operating the collection
@@ -327,7 +327,7 @@ Dashboard, book editing, stock adjustment, and returning an overdue loan, all sa
 <p align="center">
   <img src="./preview/library-manager-admin.gif" alt="Animated demonstration of the operator dashboard, editing a book's page count, changing stock from 2 to 4 copies, and returning an overdue loan" width="960" loading="lazy">
   <br>
-  <sub>Operators · Dashboard, books, stock, and circulation</sub>
+  <sub>Operators · Dashboard, books, stock, and circulation · 25 fps</sub>
 </p>
 
 #### Reader area
@@ -337,7 +337,7 @@ Catalog search, availability per library, a loan request, and the updated histor
 <p align="center">
   <img src="./preview/library-manager-catalogo.gif" alt="Animated demonstration of catalog search, the book sheet with available libraries, a loan request, and the reader's loan history" width="960" loading="lazy">
   <br>
-  <sub>Readers · Catalog, borrowing, and history</sub>
+  <sub>Readers · Catalog, borrowing, and history · 25 fps</sub>
 </p>
 
 #### Late fees and Stripe payment
@@ -347,7 +347,7 @@ Late fees computed in PostgreSQL and paid on Stripe Checkout in test mode, with 
 <p align="center">
   <img src="./preview/library-manager-pagamento.gif" alt="Animated demonstration: the reader Ana Júlia sees seven late fees totaling R$ 243.60, pays on Stripe Checkout with the 4242 test card, and returns to the app with every fine settled" width="960" loading="lazy">
   <br>
-  <sub>Readers · Late fees, Stripe Checkout, and confirmation</sub>
+  <sub>Readers · Late fees, Stripe Checkout, and confirmation · 25 fps</sub>
 </p>
 
 See [`preview/README.md`](./preview/README.md) for the recording process and instructions to regenerate the previews. The [original illustration](./preview/domestic-life-illustrated.jpg) is preserved.

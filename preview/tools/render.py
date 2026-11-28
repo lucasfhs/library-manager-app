@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import tempfile
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
@@ -11,6 +12,10 @@ HERE = Path(__file__).resolve().parent
 CAPTURE = HERE / ".capture"
 DEST = HERE.parent
 SIZE = (1280, 1000)
+FPS = 25  # GIF delays are centiseconds: 40 ms gives an exact, browser-safe cadence.
+FRAME_MS = 1000 // FPS
+TRANSITION_FRAMES = 8
+CURSOR_FRAMES = 12
 GREEN = "#0cf574"
 WHITE = "#f1f7f4"
 MUTED = "#9baea6"
@@ -65,6 +70,25 @@ def background():
 BG = background()
 
 
+def draw_pointer(image, pointer, pulse=0):
+    if not pointer:
+        return image
+    x, y = 40 + pointer["x"], 204 + pointer["y"]
+    if pulse:
+        overlay = Image.new("RGBA", SIZE, (0, 0, 0, 0))
+        ring = ImageDraw.Draw(overlay)
+        radius = 10 + 20*pulse
+        ring.ellipse((x-radius, y-radius, x+radius, y+radius),
+                     fill=(12, 245, 116, round(60*(1-pulse))),
+                     outline=(12, 245, 116, round(220*(1-pulse))), width=3)
+        image = Image.alpha_composite(image.convert("RGBA"), overlay).convert("RGB")
+    draw = ImageDraw.Draw(image)
+    draw.polygon([(x, y), (x+2, y+24), (x+9, y+18), (x+15, y+30),
+                  (x+21, y+27), (x+14, y+16), (x+24, y+15)],
+                 fill=WHITE, outline="#0a1a12", width=2)
+    return image
+
+
 def compose(scene, series, progress, pointer=None, pulse=False):
     image = BG.copy()
     draw = ImageDraw.Draw(image)
@@ -99,18 +123,7 @@ def compose(scene, series, progress, pointer=None, pulse=False):
     with Image.open(CAPTURE / scene["image"]) as screenshot:
         image.paste(screenshot.convert("RGB"), (40, 204))
 
-    if pointer:
-        x, y = 40 + pointer["x"], 204 + pointer["y"]
-        if pulse:
-            overlay = Image.new("RGBA", SIZE, (0, 0, 0, 0))
-            ring = ImageDraw.Draw(overlay)
-            ring.ellipse((x-24, y-24, x+24, y+24), fill=(12, 245, 116, 45),
-                         outline=(12, 245, 116, 220), width=3)
-            image = Image.alpha_composite(image.convert("RGBA"), overlay).convert("RGB")
-        draw = ImageDraw.Draw(image)
-        draw.polygon([(x, y), (x+2, y+24), (x+9, y+18), (x+15, y+30),
-                      (x+21, y+27), (x+14, y+16), (x+24, y+15)],
-                     fill=WHITE, outline="#0a1a12", width=2)
+    image = draw_pointer(image, pointer, 0.5 if pulse else 0)
 
     draw = ImageDraw.Draw(image)
     draw.text((42, 937), scene["note"], font=FONTS["tiny"], fill=MUTED)
@@ -131,47 +144,10 @@ def compose(scene, series, progress, pointer=None, pulse=False):
     return image
 
 
-def render(name, scenes, series):
-    # Keep screenshot durations; a few intermediate cursor positions clarify the actions.
-    frames, durations = [], []
-    previous_scene = None
-    previous_pointer = None
-    section_elapsed = 0
-    total_by_section = {}
-    for scene in scenes:
-        total_by_section[scene["section"]] = (
-            total_by_section.get(scene["section"], 0) + scene["seconds"])
-    for scene in scenes:
-        changed = previous_scene and previous_scene["section"] != scene["section"]
-        if changed:
-            section_elapsed = 0
-        section_elapsed += scene["seconds"]
-        progress = section_elapsed / total_by_section[scene["section"]]
-        frame = compose(scene, series, progress, scene["pointer"],
-                        bool(scene["pointer"] and scene["pointer"]["clicked"]))
-        if changed:
-            source = frames[-1]
-            for alpha in (0.25, 0.5, 0.75):
-                frames.append(Image.blend(source, frame, alpha))
-                durations.append(70)
-        elif previous_pointer and scene["pointer"] and scene["seconds"] >= 0.6:
-            for step in range(1, 5):
-                t = step / 5
-                ease = t*t*(3-2*t)
-                cursor = {key: previous_pointer[key] +
-                          (scene["pointer"][key]-previous_pointer[key])*ease
-                          for key in ("x", "y")}
-                frames.append(compose(previous_scene, series, progress, cursor))
-                durations.append(60)
-        frames.append(frame)
-        durations.append(max(100, round(scene["seconds"]*1000) -
-                             (240 if previous_pointer and scene["pointer"] and
-                              not changed and scene["seconds"] >= 0.6 else 0)))
-        previous_scene, previous_pointer = scene, scene["pointer"]
-
-    # One shared palette avoids flicker between keyframes; no dithering keeps text clean.
-    samples = Image.new("RGB", (320*4, 250*((len(frames)+3)//4)))
-    for i, frame in enumerate(frames):
+def shared_palette(scenes, series):
+    samples = Image.new("RGB", (320*4, 250*((len(scenes)+3)//4)))
+    for i, scene in enumerate(scenes):
+        frame = compose(scene, series, 0)
         samples.paste(frame.resize((320, 250)), ((i % 4)*320, (i//4)*250))
     base_palette = samples.quantize(colors=231, method=Image.Quantize.MEDIANCUT)
     # Large dark/green UI regions must not crowd out small pink, turquoise, red
@@ -188,33 +164,135 @@ def render(name, scenes, series):
     palette = Image.new("P", (1, 1))
     palette.putpalette(base_palette.getpalette()[:231*3] +
                        accent_palette.getpalette()[:24*3] + [0, 0, 0])
-    converted = [frame.quantize(palette=palette, dither=Image.Dither.NONE) for frame in frames]
+    return palette
+
+
+def timeline_frames(scenes, series):
+    """Render motion every 40 ms, not a static frame with a multi-second delay.
+
+    These are still genuine screenshots, with editorial cursor/crossfade motion;
+    do not invent intermediate states of the application or interpolate its data.
+    """
+    counts = []
+    elapsed = 0
+    assigned = 0
+    for scene in scenes:
+        elapsed += scene["seconds"]
+        end = round(elapsed*FPS)
+        counts.append(max(1, end-assigned))
+        assigned += counts[-1]
+    totals = {}
+    for scene, count in zip(scenes, counts):
+        totals[scene["section"]] = totals.get(scene["section"], 0) + count
+
+    previous = None
+    previous_plate = None
+    previous_frame = None
+    section_elapsed = 0
+    for scene, count in zip(scenes, counts):
+        changed = previous and previous["section"] != scene["section"]
+        if changed:
+            section_elapsed = 0
+        plate = compose(scene, series, 0)
+        pointer = scene["pointer"]
+        old_pointer = previous["pointer"] if previous and not changed else None
+        selected = "home" if scene["section"] == "closing" else scene["section"]
+        sections, _ = nav_for(selected)
+        step = 1200 // len(sections)
+        x = 40 + sections.index(selected)*step
+        width = step-14
+        # Dissolve section changes and the landing animation's sampled poses.
+        dissolve = min(TRANSITION_FRAMES, count) if changed else (
+            min(4, count) if previous and scene["section"] in {"home", "closing"} else 0)
+        travel = min(CURSOR_FRAMES, max(1, count//2))
+        for index in range(count):
+            frame = plate.copy()
+            progress = (section_elapsed+index+1)/totals[scene["section"]]
+            ImageDraw.Draw(frame).rounded_rectangle(
+                (x, 976, x+max(2, round(width*progress)), 979), radius=1, fill=GREEN)
+            cursor = pointer
+            if old_pointer and pointer and index < travel:
+                t = (index+1)/travel
+                ease = t*t*(3-2*t)
+                cursor = {key: old_pointer[key]+(pointer[key]-old_pointer[key])*ease
+                          for key in ("x", "y")}
+                # The cursor reaches the target before the recorded result is revealed.
+                if not changed and index < travel-1:
+                    frame.paste(previous_plate.crop((40, 204, 1240, 924)), (40, 204))
+            pulse = 0
+            if pointer and pointer.get("clicked") and travel <= index < travel+10:
+                pulse = (index-travel+1)/11
+            frame = draw_pointer(frame, cursor, pulse)
+            if dissolve and index < dissolve:
+                t = (index+1)/dissolve
+                frame = Image.blend(previous_frame, frame, t*t*(3-2*t))
+            yield frame
+        section_elapsed += count
+        previous, previous_plate, previous_frame = scene, plate, frame
+
+
+def render(name, scenes, series):
+    if not scenes:
+        raise ValueError(f"No scenes for {name}")
     target = DEST / name
-    converted[0].save(target, save_all=True, append_images=converted[1:],
-                      duration=durations, loop=0, optimize=True, disposal=1)
-    # Keep a content-derived palette: the GIF encoder's default RGB8 palette
-    # would otherwise flatten the illustration's pink and turquoise colors.
-    optimized = CAPTURE / name
-    subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i",
-                    str(target), "-filter_complex",
-                    "[0:v]split[a][b];[a]palettegen=max_colors=256[p];"
-                    "[b][p]paletteuse=dither=none",
-                    "-c:v", "gif", "-gifflags", "+transdiff",
-                    "-fps_mode", "passthrough", "-loop", "0", str(optimized)], check=True)
-    if optimized.stat().st_size < target.stat().st_size:
-        target.write_bytes(optimized.read_bytes())
+    # Stream frames into a lossless intermediate. Keeping hundreds of full-size
+    # RGB frames in a Python list would consume gigabytes of memory.
+    with tempfile.TemporaryDirectory(prefix="render-", dir=CAPTURE) as temporary:
+        temporary = Path(temporary)
+        movie = temporary / "motion.mkv"
+        palette_path = temporary / "palette.png"
+        palette = shared_palette(scenes, series)
+        palette_image = Image.new("P", (16, 16))
+        palette_image.putpalette(palette.getpalette())
+        palette_image.putdata(range(256))
+        palette_image.convert("RGB").save(palette_path)
+        command = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+                   "-f", "rawvideo", "-pixel_format", "rgb24",
+                   "-video_size", f"{SIZE[0]}x{SIZE[1]}", "-framerate", str(FPS),
+                   "-i", "pipe:0", "-an", "-c:v", "ffv1", "-threads", "2", str(movie)]
+        encoder = subprocess.Popen(command, stdin=subprocess.PIPE)
+        rendered = 0
+        try:
+            for frame in timeline_frames(scenes, series):
+                encoder.stdin.write(frame.tobytes())
+                rendered += 1
+        finally:
+            encoder.stdin.close()
+            code = encoder.wait()
+        if code:
+            raise subprocess.CalledProcessError(code, command)
+        encoded = temporary / name
+        subprocess.run([
+            "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+            "-i", str(movie), "-i", str(palette_path),
+            "-filter_complex", "[0:v][1:v]paletteuse=dither=none:diff_mode=rectangle",
+            "-c:v", "gif", "-gifflags", "+transdiff", "-r", str(FPS),
+            "-fps_mode", "cfr", "-loop", "0", str(encoded),
+        ], check=True)
+        # Validate before replacing an existing preview.
+        validate_gif(encoded, rendered)
+        target.write_bytes(encoded.read_bytes())
+    return validate_gif(target, rendered, report=True)
+
+
+def validate_gif(target, expected_frames, report=False):
     with Image.open(target) as gif:
-        actual_duration = 0
+        delays = []
         for i in range(gif.n_frames):
             gif.seek(i)
-            actual_duration += gif.info.get("duration", 0)
+            gif.load()
+            delays.append(gif.info.get("duration", 0))
         assert gif.info.get("loop") == 0
-        assert gif.size == SIZE and gif.n_frames > 1
+        assert gif.size == SIZE and gif.n_frames == expected_frames
+        assert set(delays) == {FRAME_MS}, f"Uneven cadence in {target.name}: {set(delays)}"
     assert target.stat().st_size < 10*1024*1024, f"{target.name} exceeds 10 MiB."
-    print(f"{name}: {actual_duration/1000:.2f}s, "
-          f"{target.stat().st_size/1024/1024:.2f} MiB")
-    return {"file": name, "duration_seconds": actual_duration/1000,
-            "bytes": target.stat().st_size, "width": SIZE[0], "height": SIZE[1]}
+    actual_duration = sum(delays)/1000
+    if report:
+        print(f"{target.name}: {actual_duration:.2f}s, {expected_frames} frames, "
+              f"{FPS} fps, {target.stat().st_size/1024/1024:.2f} MiB", flush=True)
+    return {"file": target.name, "duration_seconds": actual_duration,
+            "frames": expected_frames, "fps": FPS, "frame_delay_ms": FRAME_MS,
+             "bytes": target.stat().st_size, "width": SIZE[0], "height": SIZE[1]}
 
 
 def main():
